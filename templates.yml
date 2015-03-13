@@ -1,12 +1,5 @@
 display: 
   card: mount
-  heading: mount
-
-heading:
-  mount:
-  - append: $div.row
-  - append: h1
-  - text: It Works
 
 card-title:
   mount:
@@ -14,8 +7,8 @@ card-title:
     - append: $span.card-title
     - text: ':title'
   - call:
-    - append: p
-    - text: ':content' 
+    - append: p 
+    - text: ':content'
 
 card-content:
   mount:
@@ -43,6 +36,9 @@ card:
   - datum:
       title: Title
       content: This is the content
+      links:
+      - url: a
+      - url: b
   - call:
     - call:
       - template: ':card-content.mount'
