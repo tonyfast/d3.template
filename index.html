@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src='//cdn.jsdelivr.net/g/d3js,codemirror'></script>
+        <script src="templates.js"></script>
+        
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/js/materialize.min.js'></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.2.7/js-yaml.min.js"></script>
+        <style>
+          @import "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/css/materialize.min.css";
+          @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/4.13.0/codemirror.min.css";
+          @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/4.13.0/theme/blackboard.css";
+          body {
+            font-size: 12px;
+          }
+        </style>
+    </head>
+    <body>
+      <div id="preview" class="mode row"></div>          
+      <div id="template" class="mode"><h4>&nbsp;</h4><textarea></textarea></div>
+      <div id="toggle"><a class="waves-effect waves-light btn">Editor</a></div>
+      <script>
+        ;( function(){
+          d3.selectAll('.mode')
+            .style('opacity','.8')
+            
+          d3.selectAll('#template')
+            .style('position','absolute')                     
+            .style('top','0px')                     
+            .style('left','0px')            
+        
+          d3.selectAll('#toggle')
+            .style('position','absolute')   
+            .style('top','0px')                     
+            .style('right','0px')                     
+            .on('click', function(){
+              var d = d3.select('#template')
+                        .style('display')
+              console.log( d )
+              if (d == 'none'){
+                d = 'block';
+              } else {
+                d = 'none';
+              }
+              d3.select('#template')
+                        .style('display', d)
+                
+            })
+          
+            
+        
+          
+          d3.text('templates.yml', 'text/yaml', function(d){
+            var n = d3.select('#template textarea').html(d);
+            template = CodeMirror.fromTextArea( n.node(), {
+              theme: "blackboard",
+              lineWrapping: true
+            })
+            template.setSize( '100%', '100%')
+            template.on('update', function(){
+              d3.templates = jsyaml.load( template.getValue() );
+              
+              d3.select('#preview')
+                .call( function(s){
+                  s.html('')
+                  d3.entries( d3.templates['display'] ).forEach( function(d){
+                     d3factory( s, d.key, d.value )
+                  })
+               })
+            })
+          });
+          
+        })();
+      </script>
+    </body>
+</html>
+  

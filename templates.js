@@ -1,15 +1,10 @@
 d3factory = function(s, template, state){
-  console.log('s', template, state, s)
+  if ( !s.data()[0]){
+    s = s.datum( {} );
+  }
   if (d3.templates[template][state]){
    return s = d3machine( s, d3.templates[template][state] )
   }
-}
-
-load_templates = function ( url ){
-  d3.text( url, 'text/yml', function( yml ){  
-    var d = jsyaml.load( yml );
-    d3.templates = d;
-  }); //text
 }
 
 function d3machine( s, template ){
@@ -21,6 +16,7 @@ function d3machine( s, template ){
    if ( s.data()[0] ){
      data = s.data()[0];
    }
+  
    template.forEach( function(template){
        // do a thing in d3 and return the selection
        // selection node, inner template, current node data, global data
@@ -50,7 +46,13 @@ reduce_keys = function ( k, d, _d ){
   } else if ( inset( k[0] , [':','@'] ) ){
     return k.slice(1).split('.')
      .reduce( function( p, n){ 
-         return p[n]
+        if (p[n]){
+          return p[n]
+        } else {
+          // default if key doesn't exist
+          return {}
+        }
+         
        }, d );
   } else {
     return k;
@@ -138,6 +140,7 @@ function d3process( s, d, data ){
      // selection doesn't change
      s = s[d.key]( function(_d){
         // previously attached data
+        // previously attached data
         if (_d ){
           // merge objects
           if (typeof d.value == 'string'){
@@ -191,4 +194,82 @@ function d3process( s, d, data ){
      //s[d.key]( d.value )
    }
   return s;
-}
+}---
+---
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src='//cdn.jsdelivr.net/g/d3js,codemirror'></script>
+        <script src="templates.js"></script>
+        
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/js/materialize.min.js'></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.2.7/js-yaml.min.js"></script>
+        <style>
+          @import "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/css/materialize.min.css";
+          @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/4.13.0/codemirror.min.css";
+          @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/4.13.0/theme/blackboard.css";
+          body {
+            font-size: 12px;
+          }
+        </style>
+    </head>
+    <body>
+      <div id="preview" class="mode row"></div>          
+      <div id="template" class="mode"><h4>&nbsp;</h4><textarea></textarea></div>
+      <div id="toggle"><a class="waves-effect waves-light btn">Editor</a></div>
+      <script>
+        ;( function(){
+          d3.selectAll('.mode')
+            .style('opacity','.8')
+            
+          d3.selectAll('#template')
+            .style('position','absolute')                     
+            .style('top','0px')                     
+            .style('left','0px')            
+        
+          d3.selectAll('#toggle')
+            .style('position','absolute')   
+            .style('top','0px')                     
+            .style('right','0px')                     
+            .on('click', function(){
+              var d = d3.select('#template')
+                        .style('display')
+              console.log( d )
+              if (d == 'none'){
+                d = 'block';
+              } else {
+                d = 'none';
+              }
+              d3.select('#template')
+                        .style('display', d)
+                
+            })
+          
+            
+        
+          
+          d3.text('materialize.yml', 'text/yaml', function(d){
+            var n = d3.select('#template textarea').html(d);
+            template = CodeMirror.fromTextArea( n.node(), {
+              theme: "blackboard",
+              lineWrapping: true
+            })
+            template.setSize( '100%', '100%')
+            template.on('update', function(){
+              d3.templates = jsyaml.load( template.getValue() );
+              
+              d3.select('#preview')
+                .call( function(s){
+                  s.html('')
+                  d3.entries( d3.templates['display'] ).forEach( function(d){
+                     d3factory( s, d.key, d.value )
+                  })
+               })
+            })
+          });
+          
+        })();
+      </script>
+    </body>
+</html>
+  

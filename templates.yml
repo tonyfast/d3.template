@@ -1,28 +1,12 @@
-tabs:
- mount:
+display: 
+  card: mount
+  heading: mount
+
+heading:
+  mount:
   - append: $div.row
-  - datum:
-      tabs:
-      - first
-      - second
-      - third
-  - call:
-    - append: $div.col.s12
-    - append: $ul.tabs
-    - selectAll: li.tab
-    - data: ':tabs'
-    - call:
-      - enter:
-      - append: $li.tabs.col.s3
-      - each:
-        - append: a
- update:
-    - selectAll: li
-    - each:
-      - select: a
-      - attr: 
-          href: '#'
-      - text: ':'
+  - append: h1
+  - text: It Works
 
 card-title:
   mount:
@@ -31,7 +15,7 @@ card-title:
     - text: ':title'
   - call:
     - append: p
-    - text: ':content'
+    - text: ':content' 
 
 card-content:
   mount:
@@ -44,17 +28,21 @@ card-action:
   - append: $div.card-action
   - selectAll: a
   - data: ':links'
-  - enter:
-  - append: a
-  - each:
-    - text: '@joe.name'
-    - attr:
-        href: '@joe.url'
-card: 
+  - call:
+    - enter:
+    - append: a
+    - each:
+      - text: ':url'
+      - attr:
+          href: ':url'
+card:
   mount:
   - append: $div.row
   - append: $div.col.s12.m6
   - append: $div.card.blue.darken-1
+  - datum:
+      title: Title
+      content: This is the content
   - call:
     - call:
       - template: ':card-content.mount'
