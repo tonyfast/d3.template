@@ -1,0 +1,64 @@
+tabs:
+ mount:
+  - append: $div.row
+  - datum:
+      tabs:
+      - first
+      - second
+      - third
+  - call:
+    - append: $div.col.s12
+    - append: $ul.tabs
+    - selectAll: li.tab
+    - data: ':tabs'
+    - call:
+      - enter:
+      - append: $li.tabs.col.s3
+      - each:
+        - append: a
+ update:
+    - selectAll: li
+    - each:
+      - select: a
+      - attr: 
+          href: '#'
+      - text: ':'
+
+card-title:
+  mount:
+  - call:
+    - append: $span.card-title
+    - text: ':title'
+  - call:
+    - append: p
+    - text: ':content'
+
+card-content:
+  mount:
+  - append: $div.card-content.white-text
+  - call:
+    - template: ':card-title.mount'
+
+card-action:
+  mount: 
+  - append: $div.card-action
+  - selectAll: a
+  - data: ':links'
+  - enter:
+  - append: a
+  - each:
+    - text: '@joe.name'
+    - attr:
+        href: '@joe.url'
+card: 
+  mount:
+  - append: $div.row
+  - append: $div.col.s12.m6
+  - append: $div.card.blue.darken-1
+  - call:
+    - call:
+      - template: ':card-content.mount'
+  - call:
+    - template: ':card-action.mount'
+  
+  
