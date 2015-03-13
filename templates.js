@@ -75,7 +75,7 @@ function d3process( s, d, data ){
       })
    } else if (  d.key == 'template' ){
       // nested template perhaps
-      d3machine(s, reduce_keys( d.value, d3.templates ) )
+      s = d3machine(s, reduce_keys( d.value, d3.templates ) )
    } else if (  d.key == 'each' ){
       s = s[d.key]( function(){
         d3machine(d3.select(this), d.value);
