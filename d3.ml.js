@@ -87,7 +87,6 @@
       intersect :
         function (str, set ){
           // return true if a string is in a set of strings
-          console.log(str,set)
           return( 
             set.filter( function(d){
               return (d == str);           
@@ -180,7 +179,6 @@
        ){
          // update data in for a selection
          s = s[t.key]( function(_d){
-           console.log( t.value, data, _d)
            return d3.ml.helper.reduce( t.value, data, _d )
          })
        } else if ( 

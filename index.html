@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <script src='//cdn.jsdelivr.net/g/d3js,codemirror,jquery'></script>
-        <script src="d3.ml.js"></script>
+        <script src="templates.js"></script>
         
         <script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/js/materialize.min.js'></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.2.7/js-yaml.min.js"></script>
@@ -16,13 +16,18 @@
         </style>
     </head>
     <body>
-      <div id="preview" class="mode row"></div>          
+      <div id="preview" class="row">
+        <div class="container">
+          <h5>This tool creates webpages by the key stroke.</h5>
+          <p class="flow-text">Mark up the YAML editor with d3-like commands to build a DOM with inline data.</p>
+        </div>
+      </div>          
       <div id="template" class="mode"><h4>&nbsp;</h4><textarea></textarea></div>
       <div id="toggle"><a class="waves-effect waves-light btn">Editor</a></div>
       <script>
         ;( function(){
           d3.selectAll('.mode')
-            .style('opacity','.8')
+            .style('opacity','.7')
             
           d3.selectAll('#template')
             .style('position','absolute')                     
@@ -36,7 +41,6 @@
             .on('click', function(){
               var d = d3.select('#template')
                         .style('display')
-              console.log( d )
               if (d == 'none'){
                 d = 'block';
               } else {
