@@ -54,7 +54,7 @@
             
         
           
-          d3.text('materialize.yml', 'text/yaml', function(d){
+          d3.text('templates.yml', 'text/yaml', function(d){
             var n = d3.select('#template textarea').html(d);
             template = CodeMirror.fromTextArea( n.node(), {
               theme: "blackboard",
