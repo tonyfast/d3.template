@@ -158,7 +158,7 @@
 
             })
        } else if ( 
-         d3.ml.helper.intersect( t.key, ['attr','style'] ) 
+         d3.ml.helper.intersect( t.key, ['attr','style','property'] ) 
        ){
          // change the style of attributes
          // values are objects like class
@@ -235,10 +235,10 @@
               return (_d);
             }
          })
-       } else if ( d3.ml.helper.intersect( t.key, ['selectAll','select','insert'] ) ){
+       } else if ( d3.ml.helper.intersect( t.key, ['selectAll','select'] ) ){
          // selection changes
            s = s[t.key]( t.value );  
-       } else if ( d3.ml.helper.intersect( t.key, ['append'] ) ){
+       } else if ( d3.ml.helper.intersect( t.key, ['append','insert'] ) ){
          // selection changes
          if (t.value[0] == '$'){
 
