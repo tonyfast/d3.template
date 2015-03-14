@@ -50,7 +50,7 @@
             
         
           
-          d3.text('templates.yml', 'text/yaml', function(d){
+          d3.text('materialize.yml', 'text/yaml', function(d){
             var n = d3.select('#template textarea').html(d);
             template = CodeMirror.fromTextArea( n.node(), {
               theme: "blackboard",
@@ -58,13 +58,13 @@
             })
             template.setSize( '100%', '100%')
             template.on('update', function(){
-              d3.templates = jsyaml.load( template.getValue() );
+              d3.ml.templates = jsyaml.load( template.getValue() );
               
               d3.select('#preview')
                 .call( function(s){
                   s.html('')
-                  d3.entries( d3.templates['display'] ).forEach( function(d){
-                     d3factory( s, d.key, d.value )
+                  d3.entries( d3.ml.templates['display'] ).forEach( function(d){
+                     d3.ml.build( s, d.key, d.value )
                   })
                })
             })
@@ -74,4 +74,3 @@
       </script>
     </body>
 </html>
-  

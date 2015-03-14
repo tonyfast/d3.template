@@ -7,7 +7,7 @@ card-title:
     - append: $span.card-title
     - text: ':title'
   - call:
-    - append: p 
+    - append: p
     - text: ':content'
 
 card-content:
@@ -20,14 +20,16 @@ card-action:
   mount: 
   - append: $div.card-action
   - selectAll: a
-  - data: ':links'
+  - data: 
+    - 1
+    - 2
   - call:
     - enter:
     - append: a
     - each:
-      - text: ':url'
+      - text: ':'
       - attr:
-          href: ':url'
+          href: ':'
 card:
   mount:
   - append: $div.row
@@ -36,13 +38,9 @@ card:
   - datum:
       title: Title
       content: This is the content
-      links:
-      - url: a
-      - url: b
   - call:
     - call:
       - template: ':card-content.mount'
   - call:
     - template: ':card-action.mount'
-  
   
