@@ -1,80 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <script src='//cdn.jsdelivr.net/g/d3js,codemirror,jquery'></script>
-        <script src="d3.ml.js"></script>
-        
-        <script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/js/materialize.min.js'></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.2.7/js-yaml.min.js"></script>
-        <style>
-          @import "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/css/materialize.min.css";
-          @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/4.13.0/codemirror.min.css";
-          @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/4.13.0/theme/blackboard.css";
-          body {
-            font-size: 12px;
-          }
-        </style>
-    </head>
-    <body>
-      <div id="preview" class="row">
-        <div class="container">
-          <h5>This tool creates webpages by the key stroke.</h5>
-          <p class="flow-text">Mark up the YAML editor with d3-like commands to build a DOM with inline data.</p>
+  <head>
+    <style>
+      @import "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/css/materialize.min.css";
+      @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/codemirror.min.css";
+      @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/theme/blackboard.css";
+      @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/foldgutter.css";
+
+      body {
+        font-size: 12px;
+      }
+
+      #toolbar{
+        position: fixed;
+        right: 0;
+        top: 0;
+      }
+
+      #toggle {
+        margin-top: 1.25em;
+      }
+
+      #template {
+        position: fixed;
+        right: 0;
+        width: 400px;
+        top: 68px;
+        height: 100%;
+        opacity: 0.7;
+      }
+
+      .CodeMirror {
+        height: auto;
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <div id="preview" class="row">
+      <div class="container">
+        <h5>This tool creates webpages by the key stroke.</h5>
+        <p class="flow-text">Mark up the YAML editor with d3-like commands to build a DOM with inline data.</p>
+      </div>
+    </div>
+
+    <div id="template" class="mode"></div>
+
+    <div id="toolbar" class="col">
+      <div class="row">
+        <a id="toggle" class="waves-effect waves-light btn col s2">
+          <i class="mdi-image-edit"></i>
+        </a>
+
+        <div class="input-field col s10 download">
+          <i class="mdi-file-file-download prefix"></i>
+          <input id="template-url" type="text" class="validate" value="./templates.yml" >
+          <label for="template-url">Template URL</label>
         </div>
-      </div>          
-      <div id="template" class="mode"><h4>&nbsp;</h4><textarea></textarea></div>
-      <div id="toggle"><a class="waves-effect waves-light btn">Editor</a></div>
-      <script>
-        ;( function(){
-          d3.selectAll('.mode')
-            .style('opacity','.7')
-            
-          d3.selectAll('#template')
-            .style('position','absolute')                     
-            .style('top','0px')                     
-            .style('left','0px')            
-        
-          d3.selectAll('#toggle')
-            .style('position','absolute')   
-            .style('top','0px')                     
-            .style('right','0px')                     
-            .on('click', function(){
-              var d = d3.select('#template')
-                        .style('display')
-              if (d == 'none'){
-                d = 'block';
-              } else {
-                d = 'none';
-              }
-              d3.select('#template')
-                        .style('display', d)
-                
-            })
-          
-            
-        
-          
-          d3.text('templates.yml', 'text/yaml', function(d){
-            var n = d3.select('#template textarea').html(d);
-            template = CodeMirror.fromTextArea( n.node(), {
-              theme: "blackboard",
-              lineWrapping: true
-            })
-            template.setSize( '100%', '100%')
-            template.on('update', function(){
-              d3.ml.templates = jsyaml.load( template.getValue() );
-              
-              d3.select('#preview')
-                .call( function(s){
-                  s.html('')
-                  d3.entries( d3.ml.templates['display'] ).forEach( function(d){
-                     d3.ml.build( s, d.key, d.value )
-                  })
-               })
-            })
-          });
-          
-        })();
+      </div>
+    </div>
+
+    <script src="//cdn.jsdelivr.net/g/d3js,jquery">
       </script>
-    </body>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/codemirror.js">
+      </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/mode/yaml/yaml.js">
+      </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/foldcode.js">
+      </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/foldgutter.js">
+      </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/indent-fold.js">
+      </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/comment-fold.js">
+      </script>
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/js/materialize.min.js">
+      </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/js-yaml/3.2.7/js-yaml.min.js">
+      </script>
+
+    <script src="d3.ml.js">
+      </script>
+
+
+    <script>
+      ;( function(){
+        var toolbarHeight = 68,
+          showEditor = 1;
+
+        var template = d3.select('#template'),
+          preview = d3.select('#preview'),
+          templateUrl = d3.select("#template-url"),
+          win = d3.select(window);
+
+        var editor = CodeMirror(template.node(), {
+          theme: "blackboard",
+          mode: "yaml",
+          lineNumbers: true,
+          lineWrapping: true,
+          extraKeys: {"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); }},
+          foldGutter: {
+            rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.indent, CodeMirror.fold.comment)
+          },
+          gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+        });
+
+
+
+        d3.selectAll('#toggle')
+          .on('click', function(){
+            template.style('display',
+              (showEditor = !showEditor) ? "block" : "none"
+            );
+          });
+
+        editor.on('change', update);
+        win.on("resize", resize);
+        templateUrl.on("change", updateHash);
+        win.on("hashchange", load)
+
+        win.on("resize")();
+
+        if(hash()){
+          templateUrl.property("value", hash());
+        }
+        templateUrl.on("change")();
+
+        function hash(value){
+          if(value){
+            window.location.hash = value;
+          }
+          return window.location.hash.slice(1);
+        }
+
+        function updateHash(){
+          hash(templateUrl.property("value"));
+          win.on("hashchange")()
+        }
+
+        function load(){
+          d3.text(hash(), 'text/yaml', function(d){
+            editor.setValue(d);
+          });
+        }
+
+        function update(){
+          d3.ml.templates = jsyaml.load( editor.getValue() );
+
+          preview.call( function(s){
+            s.html('')
+            d3.entries( d3.ml.templates['display'] )
+              .forEach( function(d){
+                 d3.ml.build( s, d.key, d.value )
+              });
+          });
+        }
+
+        function resize(){
+          editor.setSize(
+            null,
+            (win.node().innerHeight - toolbarHeight) + "px"
+          )
+        }
+      })();
+    </script>
+  </body>
 </html>
