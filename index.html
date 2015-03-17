@@ -11,12 +11,12 @@
       
       
       /* Development */
-      @import "/bower_components/materialize/css/materialize.min.css";
+      @import "/bower_components/materialize/dist/css/materialize.min.css";
       @import "/bower_components/codemirror/lib/codemirror.css";
       @import "/bower_components/codemirror/theme/blackboard.css";
       @import "/bower_components/codemirror/addon/fold/foldgutter.css";
       
-      @import "app.css"
+      @import "/css/app.css"
     </style>
   </head>
   <body>
@@ -69,7 +69,11 @@
     -->
     
     <!-- Development -->
+    <script src="/bower_components/d3/d3.min.js">
+          </script>
     <script src="/bower_components/jquery/dist/jquery.min.js">
+          </script>
+    <script src="/bower_components/codemirror/lib/codemirror.js">
           </script>
     <script src="/bower_components/codemirror/mode/yaml/yaml.js">
       </script>
@@ -86,7 +90,7 @@
     <script src="/bower_components/js-yaml/dist/js-yaml.min.js">
       </script>
     
-    <script src="d3.ml.js">
+    <script src="/js/d3.ml.js">
       </script>
 
 
