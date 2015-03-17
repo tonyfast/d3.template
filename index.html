@@ -30,11 +30,14 @@
     <div id="template" class="mode"></div>
 
     <div id="toolbar" class="col">
-      <div class="row">
-        <a id="toggle" class="waves-effect waves-light btn col s2">
-          <i class="mdi-image-edit"></i>
-        </a>
+      <a id="toggle" class="waves-effect waves-light btn col s2">
+        <i class="mdi-image-edit"></i>
+      </a>
+      <a id="preview-toggle" class="waves-effect waves-light btn col s2">
+        HTML
+      </a>
 
+      <div class="row">
         <div class="input-field col s10 download">
           <i class="mdi-file-file-download prefix"></i>
           <input id="template-url" type="text" class="validate" value="./templates.yml" >
@@ -124,6 +127,31 @@
               (showEditor = !showEditor) ? "block" : "none"
             );
           });
+        
+        d3.selectAll('#preview-toggle')
+          .datum( 'HTML' )
+          .on( 'click', function(d){
+             if (d == 'HTML'){
+               d3.select('#preview')
+                 .text( function(){
+                    return this.innerHTML
+                 })
+               
+               d3.select(this)
+                 .datum( 'preview')
+                 .text( function(d){ return d;})
+             } else if ( d== 'preview' ){
+               d3.select('#preview')
+                 .html( function(){
+                    return this.innerText
+                 })
+               d3.select(this)
+                 .datum( 'HTML')
+                 .text( function(d){ return d;})
+
+             }
+               
+          })
 
         editor.on('change', update);
         win.on("resize", resize);
