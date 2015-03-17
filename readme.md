@@ -1,10 +1,13 @@
 d3.ml
 =====
 
-A markup language on top of d3 to combine data and DOM elements.  
+A d3 plugin for structured data and templates.
 
-Currently, all the selection and data API methods from d3 are available.
+Influences
+============
 
-#### Parent Nodes
-
-  classed ``.d3-ml``
+[d3js]()
+[riotjs]()
+[reactjs]()
+[handlebars]()
+[archieml]()
