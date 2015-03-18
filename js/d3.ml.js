@@ -12,9 +12,7 @@
         // default: text
         
         if ( d3.ml.requests[d.value] ){
-          d3.ml.requests[d.key] = function(){
-            return d3.ml.requests[d.value]
-          }
+          d3.ml.requests[d.key] = d3.ml.requests[d.value]
         } else {
           var f = d3.text,
               parser = function(d){return d;},
@@ -141,6 +139,9 @@
             return k.slice(1).split('.')
              .reduce( function( p, n){ 
                 if (p[n]){
+                  if ( typeof p[n] == 'function'){
+                    p[n] = p[n]();
+                  }
                   // recurse object through intersect
                   return p[n]
                 } else {
@@ -303,6 +304,12 @@
           s[t.key]( function(_d){
               return d3.ml.helper.reduce( t.value, data, _d)
           })
+       } else if ( d3.ml.helper.intersect( t.key, ['request'] ) ){
+         // append data from the d3 base
+         d3.ml.task( s, { 
+           key: 'datum', 
+           value: d3.ml.helper.reduce( t.value, d3.ml.requests )
+         }, data)
        } else {
          // don't use any other commands yet
        }
