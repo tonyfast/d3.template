@@ -17,3 +17,5 @@ Influences
 [reactjs]()
 [handlebars]()
 [archieml]()
+
+YOU CANNOT IMPORT REQUESTS FROM OTHER PLACES.  ONLY THE TEMPLATES.

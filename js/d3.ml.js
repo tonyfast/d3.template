@@ -6,6 +6,35 @@
     templates: {},
     requests: {},
     scripts: {},
+    get: 
+      function(d){
+        // make it easy as possible to get the correctly typed file
+        // default: text
+        
+        if ( d3.ml.requests[d.value] ){
+          d3.ml.requests[d.key] = function(){
+            return d3.ml.requests[d.value]
+          }
+        } else {
+          var f = d3.text,
+              parser = function(d){return d;},
+              out = {};
+
+          if( 
+            d3.ml.helper.intersect( d.value.split('.').slice(-1)[0], ['json','xml','tsv','csv'] ) 
+          ){
+            f = d3[ d.value.split('.').slice(-1)[0] ]
+          } else if (  
+            d3.ml.helper.intersect( d.value.split('.').slice(-1)[0], ['yaml','yml'] ) 
+          ){
+            parser = function(d){return jsyaml.load( d );}
+          }
+
+          f(d.value, function(_d){
+            d3.ml.requests[d.value] = parser(_d)
+          })
+        }
+      },
     build: 
       function(s, template){
           // Initial DOM node data
@@ -14,6 +43,12 @@
             // make sure the parent selection has
             // data for the worker to use.
             s = s.datum( {} );
+          }
+        
+          if (d3.ml.templates['requests']){
+            d3.entries(d3.ml.templates['requests']).forEach( function(d){
+              d3.ml.get(d)
+            })
           }
 
           if ( template ){
