@@ -128,6 +128,10 @@
         function ( k, d, _d ){
           // get the value of a key for
           // either the current scope ':' or local scope '@'
+          if ( k.slice(0,9) == ( ':requests') ){
+            d = d3.ml
+          }
+          
           if (k[0] == '@'){    
           // return data from the local scope
             d = _d;
@@ -139,9 +143,6 @@
             return k.slice(1).split('.')
              .reduce( function( p, n){ 
                 if (p[n]){
-                  if ( typeof p[n] == 'function'){
-                    p[n] = p[n]();
-                  }
                   // recurse object through intersect
                   return p[n]
                 } else {
@@ -249,7 +250,7 @@
 
          })
        } else if ( d3.ml.helper.intersect( t.key, ['datum'] ) ){
-         // append data-on-the-fly
+         // append data-on-the-fly  
          s = s[t.key]( function(_d){
             // previously attached data
             if (_d ){
@@ -304,12 +305,6 @@
           s[t.key]( function(_d){
               return d3.ml.helper.reduce( t.value, data, _d)
           })
-       } else if ( d3.ml.helper.intersect( t.key, ['request'] ) ){
-         // append data from the d3 base
-         d3.ml.task( s, { 
-           key: 'datum', 
-           value: d3.ml.helper.reduce( t.value, d3.ml.requests )
-         }, data)
        } else {
          // don't use any other commands yet
        }
