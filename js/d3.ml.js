@@ -7,28 +7,25 @@
     requests: {},
     scripts: {},
     build: 
-      function(s, template, state){
-          // for a selection build a template's state
-          // with available requests, templates, and scripts
-
+      function(s, template){
+          // Initial DOM node data
+          // Append a template to a selection
           if ( !s.data()[0]){
             // make sure the parent selection has
             // data for the worker to use.
             s = s.datum( {} );
           }
 
-          if ( d3.ml.templates[template][state] ){
+          if ( template ){
             // add a class to the parent selection so it knows d3ml was used
             s.classed('d3-ml',true);
 
             // build the template only if it exists
             return d3.ml.worker( 
               s, 
-              d3.ml.templates[template][state] 
+              template
             )
-          } else {
-            console.log( 'There is no template, ' + template + ',with the state,' + state +'.' );
-          }
+          } 
       },
     worker: 
       function ( s, template ){
@@ -40,8 +37,9 @@
            // bring it into the scope 
            var data = s.data()[0];
          }
-
-         template.forEach( function(template){
+        
+        console.log( 's', s, template )
+        template.forEach( function(template){
            // for each of selections
            // traverse the templates with
            // d3ml
@@ -132,7 +130,7 @@
           })
        } else if (  t.key == 'template' ){
           // send a nested template to the worker to execute
-          s = d3.ml.worker(
+          s = d3.ml.build(
             s,
             d3.ml.helper.reduce( 
               t.value, 

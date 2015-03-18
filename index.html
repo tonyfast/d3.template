@@ -190,7 +190,10 @@
             s.html('')
             d3.entries( d3.ml.templates['display'] )
               .forEach( function(d){
-                 d3.ml.build( s, d.key, d.value )
+               if (d3.ml.templates[d.key][d.value] ){
+                 d3.ml.build( s, d3.ml.templates[d.key][d.value] )
+               }
+                 
               });
           });
         }
