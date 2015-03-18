@@ -11,25 +11,27 @@
         // make it easy as possible to get the correctly typed file
         // default: text
         
-        if ( d3.ml.requests[d.value] ){
-          d3.ml.requests[d.key] = d3.ml.requests[d.value]
+        var _d  = d3.entries( d.value )[0]
+        
+        if ( d3.ml.requests[_d.value] ){
+          d3.ml.requests[d.key] = d3.ml.requests[_d.value]
         } else {
           var f = d3.text,
               parser = function(d){return d;},
               out = {};
 
           if( 
-            d3.ml.helper.intersect( d.value.split('.').slice(-1)[0], ['json','xml','tsv','csv'] ) 
+            d3.ml.helper.intersect( _d.key, ['json','xml','tsv','csv'] ) 
           ){
-            f = d3[ d.value.split('.').slice(-1)[0] ]
+            f = d3[ _d.key ]
           } else if (  
-            d3.ml.helper.intersect( d.value.split('.').slice(-1)[0], ['yaml','yml'] ) 
+            d3.ml.helper.intersect( _d.key, ['yaml','yml'] ) 
           ){
             parser = function(d){return jsyaml.load( d );}
           }
 
-          f(d.value, function(_d){
-            d3.ml.requests[d.value] = parser(_d)
+          f(_d.value, function(d){
+            d3.ml.requests[_d.value] = parser(d)
           })
         }
       },
@@ -129,7 +131,8 @@
           // get the value of a key for
           // either the current scope ':' or local scope '@'
           if ( k.slice(0,9) == ( ':requests') ){
-            d = d3.ml
+            d = d3.ml.requests
+            k = ':' + k.slice(10)
           }
           
           if (k[0] == '@'){    
