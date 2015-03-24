@@ -1,0 +1,22 @@
+{
+  "name": "d3.ml",
+  "version": "0.0.0",
+  "homepage": "http://tonyfast.com/d3.ml",
+  "authors": [
+    "Tony Fast <tonyfast@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "codemirror": "~5.0.0",
+    "d3": "~3.5.5",
+    "js-yaml": "~3.2.7",
+    "materialize": "~0.95.3"
+  }
+}
