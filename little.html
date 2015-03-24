@@ -74,13 +74,11 @@
   card-content:
   - append: $div.card-content.white-text
   - call: 
+    - append: a
+    - attr: 
+         href: '@html_url'
     - append: $span.card-title
-    - text: Card Title
-  - call: 
-    - append: p 
-    - text: > 
-        I am a very simple card. I am good at containing small bits of information.
-        I am convenient because I require little markup to use effectively.
+    - text: '@description'
         
   card-action:
   - append: $div.card-action
