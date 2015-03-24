@@ -63,9 +63,8 @@
       - append: $li.collection-item
       - text: Alvin              
   card:
-  - template: :templates.row
   - call:
-    - append: $div.col.s12.m6
+    - append: $div.col.s6.m6
     - append: $div.card.blue-grey.darken-1
     - call:
       - template: :templates.card-content
@@ -100,7 +99,16 @@
   - call:
     - template: :templates.collection
   - call:
-    - template: :templates.card
+    - append: $div.row
+    - requests:
+        gist.json: https://api.github.com/users/tonyfast/gists
+        call:
+        - selectAll: .card
+        - data: :d3.requests.gist
+        - call:
+          - enter:
+          - template: :templates.card
+          
     
   </script>
   <script>
