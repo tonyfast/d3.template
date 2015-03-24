@@ -12,21 +12,39 @@ d3.selection.prototype.template = (template) ->
           s = s[t.key] t.value
       else
         s = s[t.key] (d) ->
-          reduce(t.value, d )
-      s
+          reduce t.value, d 
+    s      
   
   rules = 
+    template: (s,t) ->
+      build s, reduce( t, null )
+    attr: (s,t) ->
+      d3.entries t
+        .forEach (t) ->
+          unless t.value
+            t.value = true
+          s.attr t.key, (d) ->
+            reduce t.value, d
+      s
+    'class': (s,t) ->
+      d3.entries t
+        .forEach (t) ->
+          unless t.value
+            t.value = true
+          s.classed t.key, (d) ->
+            reduce t.value, d
+      s
     enter: (s,t) ->
-      s = s.enter()
+      s.enter()
     exit: (s,t) ->
-      s = s.exit()
+      s.exit()
     remove: (s,t) ->
-      s = s.remove()
+      s.remove()
     call: ( s, t) ->
-      s = s.call (s) ->
+      s.call (s) ->
         build s, t
     each: ( s, t) ->
-      s = s.each (d) ->
+      s.each (d) ->
         build d3.select(@), t
     append: (s,t) ->
         id = null
@@ -105,4 +123,4 @@ d3.selection.prototype.template = (template) ->
       #{path has data}
       path
     
-  build( @, template)
+  build @, template

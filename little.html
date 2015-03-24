@@ -1,44 +1,115 @@
 ---
 ---
 <head>
-<script src="{{site.baseurl}}/bower_components/d3/d3.min.js">
-  </script>
-<script src="{{site.baseurl}}/bower_components/js-yaml/dist/js-yaml.min.js">
-  </script>
-<script src="{{site.baseurl}}/js/d3.ml.js">
-  </script>
+  <style>
+    @import "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/css/materialize.min.css";
+  </style>
+  <script src="{{site.baseurl}}/bower_components/d3/d3.min.js">
+    </script>
+  <script src="{{site.baseurl}}/bower_components/js-yaml/dist/js-yaml.min.js">
+    </script>
+  <script src="{{site.baseurl}}/js/d3.ml.js">
+    </script>
+  <script src="{{site.baseurl}}/bower_components/jquery/dist/jquery.min.js">
+    </script>
+  <script src="{{site.baseurl}}/bower_components/materialize/dist/js/materialize.min.js">
+    </script>
+
 </head>
 <body>
   <script id="manifest" type="text/yaml">
-  resources:
-  - append: $div.row
-  - requests:
-      a.yaml: templates.yml
-      call:
-      - select: '.row'
-      - datum: :d3.requests.a
-      - selectAll: 'h1'
-      - data: '@list'
-      - call:
+  navbar:
+  - append: $nav
+  - call:
+    - append: $div.nav-wrapper
+    - call:
+      - append: $a.brand-logo
+      - text: Logo
+      - attr:
+          href: '#'
+    - call:
+      - append: $ul.right.hide-on-med-and-down#nav-mobile
+      - selectAll: li
+      - data:
+        - name: Sass
+          href: sass.html
+        - name: Components
+          href: components.html
+        - name: Javascript
+          href: javascript.html
+      - call: 
         - enter:
-        - append: h1
+        - append: li
         - each:
-          - text: '@'
+          - append: a
+          - attr: 
+              href: '@href'
+          - text: '@name'
+          
+  container:
+  - append: $div.container
+  
+  row:
+  - append: $div.row
+  
+  collection:
+  - template: :templates.container
+  - call:
+    - append: $ul.collection
+    - selectAll: li.collection-item
+    - data: [1,2,3,4]
+    - call:
+      - enter:
+      - append: $li.collection-item
+      - text: Alvin              
+  card:
+  - template: :templates.row
+  - call:
+    - append: $div.col.s12.m6
+    - append: $div.card.blue-grey.darken-1
+    - call:
+      - template: :templates.card-content
+    - call:
+      - template: :templates.card-action
 
-
-      
-      
-      
-  - append: $div.row  
+  card-content:
+  - append: $div.card-content.white-text
+  - call: 
+    - append: $span.card-title
+    - text: Card Title
+  - call: 
+    - append: p 
+    - text: > 
+        I am a very simple card. I am good at containing small bits of information.
+        I am convenient because I require little markup to use effectively.
+        
+  card-action:
+  - append: $div.card-action
+  - selectAll: 'a'
+  - data: [1,2]
+  - call:
+    - enter:
+    - append: a
+    - attr: 
+        href: '#'
+    - text: This is a link
+  
+  body:
+  - call:
+    - template: :templates.navbar
+  - call:
+    - template: :templates.collection
+  - call:
+    - template: :templates.card
+    
   </script>
   <script>
     ;(function(){
+      templates = jsyaml.load(  d3.select('#manifest').html()
+          )
+      
       d3.select('body')
-        .template(
-          jsyaml.load( 
-            d3.select('#manifest').html()
-          )['resources']
-        )
+        .template( templates['body'] )
 
     })();
   </script>
