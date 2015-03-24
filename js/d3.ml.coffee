@@ -18,6 +18,13 @@ d3.selection.prototype.template = (template) ->
   rules = 
     template: (s,t) ->
       build s, reduce( t, null )
+    data: (s,t) ->
+      #{ force data to be an array or convenience? }
+      s.data (d) ->
+        t = reduce t, d 
+        unless Array.isArray(t)
+          t = d3.entries t
+        t
     attr: (s,t) ->
       d3.entries t
         .forEach (t) ->
