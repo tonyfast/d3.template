@@ -1,0 +1,45 @@
+---
+---
+<head>
+<script src="{{site.baseurl}}/bower_components/d3/d3.min.js">
+  </script>
+<script src="{{site.baseurl}}/bower_components/js-yaml/dist/js-yaml.min.js">
+  </script>
+<script src="{{site.baseurl}}/js/d3.ml.js">
+  </script>
+</head>
+<body>
+  <script id="manifest" type="text/yaml">
+  resources:
+  - append: $div.row
+  - requests:
+      a.yaml: templates.yml
+      call:
+      - select: '.row'
+      - datum: :d3.requests.a
+      - selectAll: 'h1'
+      - data: '@list'
+      - call:
+        - enter:
+        - append: h1
+        - each:
+          - text: '@'
+
+
+      
+      
+      
+  - append: $div.row  
+  </script>
+  <script>
+    ;(function(){
+      d3.select('body')
+        .template(
+          jsyaml.load( 
+            d3.select('#manifest').html()
+          )['resources']
+        )
+
+    })();
+  </script>
+</body>
