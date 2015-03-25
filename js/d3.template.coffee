@@ -138,6 +138,9 @@ d3.selection.prototype.template = (template) ->
             s = get type, f
           else 
             d3['requests'][t.key] = d3['requests'][t.value] 
+            s = s.call (s) ->
+              build s, template
+
       s      
   reduce = (path, d) ->
     if typeof path == 'string' and path[0] in ['@',':']
