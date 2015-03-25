@@ -1,46 +1,94 @@
-display: 
-  card: mount
+display:
+- template: :d3templates.navbar
 
-card-title:
-  mount:
+navbar:
+- append: $nav
+- call:
+  - append: $div.nav-wrapper
   - call:
-    - append: $span.card-title
-    - text: ':title'
+    - append: $a.brand-logo
+    - text: Logo
+    - attr:
+        href: '#'
   - call:
-    - append: p
-    - text: ':content'
+    - append: $ul.right.hide-on-med-and-down#nav-mobile
+    - selectAll: li
+    - data:
+      - name: Sass
+        href: sass.html 
+      - name: Components
+        href: components.html
+      - name: Javascript
+        href: javascript.html
+      - name: Javascript
+        href: javascript.html
+    - call: 
+      - enter:
+      - append: li
+      - each:
+        - append: a
+        - attr: 
+            href: '@href'
+        - text: '@name'
 
-card-content:
-  mount:
-  - append: $div.card-content.white-text
-  - call:
-    - template: ':card-title.mount'
+container:
+- append: $div.container
 
-card-action:
-  mount: 
-  - append: $div.card-action
-  - selectAll: a
-  - data: 
-    - 1
-    - 2
+row:
+- append: $div.row
+
+collection:
+- template: :templates.container
+- call:
+  - append: $ul.collection
+  - selectAll: li.collection-item
+  - data: [1,2,3,4]
   - call:
     - enter:
-    - append: a
-    - each:
-      - text: ':'
-      - attr:
-          href: ':'
+    - append: $li.collection-item
+    - text: Alvin              
 card:
-  mount:
+- call:
+  - append: $div.col.s6.m6
+  - append: $div.card.blue-grey.darken-1
+  - call:
+    - template: :templates.card-content
+  - each:
+    - template: :templates.card-action
+
+card-content:
+- append: $div.card-content.white-text
+- call: 
+  - append: a
+  - attr: 
+       href: '@html_url'
+  - append: $span.card-title
+  - text: '@description'
+
+card-action:
+- append: $div.card-action
+- selectAll: 'a'
+- data: '@files'
+- call:
+  - enter:
+  - append: a
+  - each:
+    - attr: 
+        href: '@value.raw_url'
+    - text: '@key'
+
+body:
+- call:
+  - template: :templates.navbar
+- call:
+  - template: :templates.collection
+- call:
   - append: $div.row
-  - append: $div.col.s12.m6
-  - append: $div.card.blue.darken-1
-  - datum:
-      title: Title
-      content: This is the content
-  - call:
-    - call:
-      - template: ':card-content.mount'
-  - call:
-    - template: ':card-action.mount'
-  
+  - requests:
+      gist.json: https://api.github.com/users/tonyfast/gists
+      call:
+      - selectAll: .card
+      - data: :d3.requests.gist
+      - call:
+        - enter:
+        - template: :templates.card
