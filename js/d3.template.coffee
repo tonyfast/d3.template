@@ -30,6 +30,9 @@ d3.selection.prototype.template = (template) ->
     s      
   
   rules = 
+    js: (s,t ) ->
+      eval t
+      s
     template: (s,t) ->
       build s, reduce( t, null )
     data: (s,t) ->
@@ -103,8 +106,9 @@ d3.selection.prototype.template = (template) ->
         s
     child: (s,t) -> rules.call(s,t)
     requests: (s,t)->
-      template = t['call']
-      delete t['call']
+      if t['call']
+        template = t['call']
+        delete t['call']
       t = d3.entries t
       unless d3['requests']
         d3.requests = {}
@@ -125,7 +129,8 @@ d3.selection.prototype.template = (template) ->
               .get (e,d) ->
                  d3['requests'][t.value] = callback(d)
                  d3['requests'][t.key] = d3['requests'][t.value] 
-                 if i == l 
+                 console.log i,l,t.key,t.value
+                 if i == l and template
                     s = s.call (s) ->
                       build s, template
               s
@@ -138,8 +143,9 @@ d3.selection.prototype.template = (template) ->
             s = get type, f
           else 
             d3['requests'][t.key] = d3['requests'][t.value] 
-            s = s.call (s) ->
-              build s, template
+            if i == l and template
+              s = s.call (s) ->
+                build s, template
 
       s      
   reduce = (path, d) ->
