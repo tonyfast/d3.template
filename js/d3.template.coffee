@@ -39,6 +39,9 @@ d3.selection.prototype.template = (template) ->
         unless Array.isArray(t)
           t = d3.entries t
         t
+    datum: (s,t) ->
+      #{ force data to be an array or convenience? }
+      s.datum (d) -> reduce t, d 
     attr: (s,t) ->
       d3.entries t
         .forEach (t) ->
