@@ -112,7 +112,7 @@
       </script>
     -->
     
-    <script src="{{site.baseurl}}/js/d3.ml.js">
+    <script src="{{site.baseurl}}/js/d3.template.js">
       </script>
 
 
@@ -207,17 +207,11 @@
         }
 
         function update(){
-          d3.ml.templates = jsyaml.load( editor.getValue() );
+          d3templates = jsyaml.load( editor.getValue() );
 
           preview.call( function(s){
             s.html('')
-            d3.entries( d3.ml.templates['display'] )
-              .forEach( function(d){
-               if (d3.ml.templates[d.key][d.value] ){
-                 d3.ml.build( s, d3.ml.templates[d.key][d.value] )
-               }
-                 
-              });
+             .template( d3templates.display )
           });
         }
 
