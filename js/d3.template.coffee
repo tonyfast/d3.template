@@ -32,6 +32,14 @@ d3.selection.prototype.template = (template) ->
     s      
   
   rules = 
+    text: (s,t,state) ->
+      s.text (d,i) ->
+        if Array.isArray(t)
+          t.map (_d,i) ->
+            reduce _d, d, state
+          .join ''
+        else
+          reduce t, d, state
     js: (s,t) ->
       eval t
       s
