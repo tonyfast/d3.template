@@ -32,6 +32,10 @@ d3.selection.prototype.template = (template) ->
     s      
   
   rules = 
+    domain: (s,t,state) ->
+      #{update state}
+      
+      s
     text: (s,t,state) ->
       s.text (d,i) ->
         if Array.isArray(t)
