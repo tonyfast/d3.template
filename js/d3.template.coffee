@@ -17,57 +17,59 @@ d3.selection.prototype.template = (template) ->
   d3.selection.template modifies d3.selection.prototype.template and d3.requests
   ###
   
-  build = ( s, t) ->
+  build = ( s, t, state) ->
+    if not state
+      state = {}
     t.forEach (t) ->
       t = d3.entries(t)[0]
       if rules[t.key]
-        s = rules[t.key]( s, t.value)
+        s = rules[t.key]( s, t.value, state )
       else if t.key in ['selectAll','select']
           s = s[t.key] t.value
       else
         s = s[t.key] (d) ->
-          reduce t.value, d 
+          reduce t.value, d, state
     s      
   
   rules = 
-    js: (s,t ) ->
+    js: (s,t) ->
       eval t
       s
-    template: (s,t) ->
-      build s, reduce( t, null )
-    data: (s,t) ->
+    template: (s,t, state) ->
+      build s, reduce( t, null, state )
+    data: (s,t, state) ->
       #{ force data to be an array or convenience? }
       s.data (d) ->
-        t = reduce t, d 
+        t = reduce t, d, state
         unless Array.isArray(t)
           t = d3.entries t
         t
-    datum: (s,t) ->
+    datum: (s,t, state) ->
       #{ force data to be an array or convenience? }
-      s.datum (d) -> reduce t, d 
-    attr: (s,t) ->
+      s.datum (d) -> reduce t, d, state
+    attr: (s,t, state) ->
       d3.entries t
         .forEach (t) ->
           unless t.value
             t.value = true
           s.attr t.key, (d) ->
-            reduce t.value, d
+            reduce t.value, d, state
       s
-    style: (s,t) ->
+    style: (s,t, state) ->
       d3.entries t
         .forEach (t) ->
           unless t.value
             t.value = true
           s.style t.key, (d) ->
-            reduce t.value, d
+            reduce t.value, d, state
       s
-    'class': (s,t) ->
+    'class': (s,t, state) ->
       d3.entries t
         .forEach (t) ->
           unless t.value
             t.value = true
           s.classed t.key, (d) ->
-            reduce t.value, d
+            reduce t.value, d, state
       s
     enter: (s,t) ->
       s.enter()
@@ -75,12 +77,13 @@ d3.selection.prototype.template = (template) ->
       s.exit()
     remove: (s,t) ->
       s.remove()
-    call: ( s, t) ->
+    call: ( s, t, state) ->
       s.call (s) ->
-        build s, t
-    each: ( s, t) ->
-      s.each (d) ->
-        build d3.select(@), t
+        build s, t, state
+    each: ( s, t, state) ->
+      s.each (d, i) ->
+        state['i'] = i
+        build d3.select(@), t, state
     append: (s,t) ->
         id = null
         tag = null
@@ -104,8 +107,8 @@ d3.selection.prototype.template = (template) ->
         else
           s = s.append t
         s
-    child: (s,t) -> rules.call(s,t)
-    requests: (s,t)->
+    child: (s,t, state) -> rules.call(s,t, state)
+    requests: (s,t, state)->
       if t['call']
         template = t['call']
         delete t['call']
@@ -121,7 +124,6 @@ d3.selection.prototype.template = (template) ->
           if t.key[1]
             type = t.key[1]
             t.key = t.key[0]
-            
             
           unless d3['requests'][t.value]
             get = (type, callback, complete)->
@@ -145,13 +147,15 @@ d3.selection.prototype.template = (template) ->
             d3['requests'][t.key] = d3['requests'][t.value] 
             if i == l and template
               s = s.call (s) ->
-                build s, template
+                build s, template, state
 
       s      
-  reduce = (path, d) ->
+  reduce = (path, d, state) ->
     if typeof path == 'string' and path[0] in ['@',':']
       if path in ['@']
         d
+      else if path in ['@i']
+        state.i
       else
         if path[0] == ':'
           d = window
