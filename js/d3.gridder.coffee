@@ -1,14 +1,16 @@
 ---
 ---
+#{ create a button to explore nodes with datum}
 d3.select 'body'
-  .append 'svg'
-  .attr 'width', 60
-  .attr 'height', 60
+  .append 'div'
+  .style 'width', 60
+  .style 'height', 60
   .style 'position', 'fixed'
   .style 'right', 0
   .style 'top', 0
   .style 'background-color', 'green'
   .style 'z-index',100
+  .text 'show data'
   .style 'opacity', '.6'
   .on 'click', () ->
     d3.select @
@@ -33,6 +35,7 @@ d3.select 'body'
 
 d3.gridder = ( el ) ->
   
+  #{ traverse children to find data}
   children = (s,d) ->
     n = [].slice.call(s.node().children)
     n.forEach (n) ->
@@ -42,23 +45,16 @@ d3.gridder = ( el ) ->
       d = children d3.select(n), d
     d
   
+  #{ get all nodes with data}
   d = []
   d3.select el
     .call (s) ->
       d = children s, []
   
   w = d3.max( d,(d) -> d['right'] )
-  h = d3.max( d,(d) -> d['top'] )
-  
-  x = d3.scale.linear()
-    #{.domain [d3.min( d,(d) -> d['left'] ),w]}
-    .domain [0,w]
-    .range [0, w]
-  y = d3.scale.linear()
-    #{.domain [d3.min( d,(d) -> d['top'] ),h]}
-    .domain [0,h]
-    .range [0, h]
+  h = d3.max( d,(d) -> d['bottom'] )
 
+  #{ create svg }
   overlay = d3.select 'body'
     .append 'svg'
     .attr 'id', 'overlay'
@@ -73,10 +69,11 @@ d3.gridder = ( el ) ->
     .append 'rect'
     .each (d,i)->
       d3.select @
-        .attr 'x', x( d['left'] )
-        .attr 'y', y( d['top'] )
-        .attr 'width', x( d['width'] )
-        .attr 'height', y( d['height'] )
+        .attr 'x', d['left']
+        .attr 'y', d['top']
+        .attr 'width', d['width']
+        .attr 'height', d['height']
         .style 'fill', 'blue'
-        .style 'stroke', 'pink'
+        .style 'stroke', 'black'
+        .style 'stroke-width', 2
         .style 'opacity', '.1'
