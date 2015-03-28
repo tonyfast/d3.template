@@ -56,7 +56,6 @@
             - append: $input.validate#template-url
             - attr:
                 type: text
-                value: './templates.yml'
           - call:
             - append: $label
             - attr:
@@ -204,7 +203,7 @@
 
         function load(){
           d3.text(hash(), 'text/yaml', function(d){
-            editor.setValue(d);
+            editor.setValue('');
           });
         }
 
