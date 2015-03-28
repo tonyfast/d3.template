@@ -21,29 +21,73 @@
         state = {};
       }
       t.forEach(function(t) {
-        var _ref;
+        var args, _ref;
         t = d3.entries(t)[0];
+        args = t.key.split('.');
+        if (args.length > 1 && d3['scales'] && d3['scales'][args.slice(-1)[0]]) {
+          state.callback = d3['scales'][args.slice(-1)[0]];
+          t.key = args.slice(0, -1).join('');
+        } else {
+          state.callback = function(d) {
+            return d;
+          };
+        }
         if (rules[t.key]) {
           return s = rules[t.key](s, t.value, state);
         } else if ((_ref = t.key) === 'selectAll' || _ref === 'select') {
           return s = s[t.key](t.value);
         } else {
           return s = s[t.key](function(d) {
-            return reduce(t.value, d, state);
+            return reduce(t.value, d, state, s);
           });
         }
       });
       return s;
     };
     rules = {
+      scales: function(s, t, state) {
+        var d;
+        d = s.data();
+        d3.entries(t).forEach(function(t) {
+          if (!d3['scales']) {
+            return d3['scales'] = {};
+          } else if (typeof t.value === 'object') {
+            d3['scales'][t.key] = d3.scale.linear();
+            return d3.entries(t.value).forEach(function(_t) {
+              var temp;
+              if (Array.isArray(_t.value)) {
+                temp = [];
+                _t.value.forEach(function(_t) {
+                  return temp.push(reduce(_t, d, state, s));
+                });
+                t.value = temp;
+              } else {
+                t.value = d3.extent(d, function(_d, i) {
+                  var v;
+                  state.i = i;
+                  v = reduce(_t.value, _d, state, s);
+                  if (v && v['trim']) {
+                    v = parseFloat(v.trim());
+                  }
+                  return v;
+                });
+              }
+              return d3['scales'][t.key][_t.key](reduce(t.value, d, state, s));
+            });
+          } else {
+            return d3['scales'][t.key] = reduce(t.value, d, state, s);
+          }
+        });
+        return s;
+      },
       text: function(s, t, state) {
         return s.text(function(d, i) {
           if (Array.isArray(t)) {
             return t.map(function(_d, i) {
-              return reduce(_d, d, state);
+              return reduce(_d, d, state, s);
             }).join('');
           } else {
-            return reduce(t, d, state);
+            return reduce(t, d, state, s);
           }
         });
       },
@@ -52,7 +96,7 @@
         return s;
       },
       template: function(s, t, state) {
-        return build(s, reduce(t, null, state));
+        return build(s, reduce(t, null, state, s));
       },
       data: function(s, t, state) {
         return s.data(function(d) {
@@ -74,7 +118,7 @@
             t.value = true;
           }
           return s.attr(t.key, function(d) {
-            return reduce(t.value, d, state);
+            return reduce(t.value, d, state, s);
           });
         });
         return s;
@@ -85,7 +129,7 @@
             t.value = true;
           }
           return s.style(t.key, function(d) {
-            return reduce(t.value, d, state);
+            return reduce(t.value, d, state, s);
           });
         });
         return s;
@@ -96,7 +140,7 @@
             t.value = true;
           }
           return s.classed(t.key, function(d) {
-            return reduce(t.value, d, state);
+            return reduce(t.value, d, state, s);
           });
         });
         return s;
@@ -212,24 +256,31 @@
         return s;
       }
     };
-    reduce = function(path, d, state) {
+    reduce = function(path, d, state, s) {
       var _ref;
       if (typeof path === 'string' && ((_ref = path[0]) === '@' || _ref === ':')) {
         if (path === '@') {
-          return d;
+          d;
         } else if (path === '@i') {
-          return state.i;
+          d = state.i;
         } else {
           if (path[0] === ':') {
             d = window;
+          } else if (path.slice(0, 5) === '@this') {
+            d = s.node();
+            path = ['@', path.slice(6)].join('');
           }
-          return path.slice(1).split('.').reduce(function(p, k) {
+          d = path.slice(1).split('.').reduce(function(p, k) {
             return p[k];
           }, d);
         }
       } else {
-        return path;
+        d = path;
       }
+      if (typeof d === 'function' && typeof d() === 'function') {
+        d = d();
+      }
+      return state.callback(d);
     };
     return build(this, template);
   };
