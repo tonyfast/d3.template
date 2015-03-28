@@ -19,7 +19,9 @@ d3.selection.prototype.template = (template) ->
   
   build = ( s, t, state) ->
     if not state
-      state = {}
+      state = 
+        i: null
+        callback: (d)->d
     t.forEach (t) ->
       t = d3.entries(t)[0]
       if rules[t.key]
@@ -28,23 +30,49 @@ d3.selection.prototype.template = (template) ->
           s = s[t.key] t.value
       else
         s = s[t.key] (d) ->
-          reduce t.value, d, state
+          reduce t.value, d, state, s
     s      
   
   rules = 
+    scales: (s,t,state) ->
+      d = s.data()
+      d3.entries t
+        .forEach (t) ->
+          if not d3['scales']
+            d3['scales'] = {}
+          else if typeof t.value == 'object'
+            d3['scales'][t.key] = d3.scale.linear()
+            d3.entries t.value
+              .forEach (_t) ->
+                if Array.isArray( _t.value )
+                  temp = []
+                  _t.value.forEach (_t) ->
+                    temp.push reduce( _t, d, state, s)
+                  t.value = temp
+                else 
+                  t.value = d3.extent d, (_d,i) ->
+                    state.i = i
+                    v = reduce( _t.value, _d, state, s)
+                    if v['trim']
+                      v = parseFloat v.trim()
+                    v
+                d3['scales'][t.key][_t.key] reduce( t.value, d, state, s)
+          else
+            d3['scales'][t.key] = reduce  t.value, d, state, s
+      s   
     text: (s,t,state) ->
       s.text (d,i) ->
         if Array.isArray(t)
           t.map (_d,i) ->
-            reduce _d, d, state
+            reduce _d, d, state, s
           .join ''
         else
-          reduce t, d, state
+          reduce t, d, state, s
     js: (s,t) ->
       eval t
       s
     template: (s,t, state) ->
-      build s, reduce( t, null, state )
+      build s, reduce( t, null, state, s )
     data: (s,t, state) ->
       #{ force data to be an array or convenience? }
       s.data (d) ->
@@ -61,7 +89,7 @@ d3.selection.prototype.template = (template) ->
           unless t.value
             t.value = true
           s.attr t.key, (d) ->
-            reduce t.value, d, state
+            reduce t.value, d, state, s
       s
     style: (s,t, state) ->
       d3.entries t
@@ -69,7 +97,7 @@ d3.selection.prototype.template = (template) ->
           unless t.value
             t.value = true
           s.style t.key, (d) ->
-            reduce t.value, d, state
+            reduce t.value, d, state, s
       s
     'class': (s,t, state) ->
       d3.entries t
@@ -77,7 +105,7 @@ d3.selection.prototype.template = (template) ->
           unless t.value
             t.value = true
           s.classed t.key, (d) ->
-            reduce t.value, d, state
+            reduce t.value, d, state, s
       s
     enter: (s,t) ->
       s.enter()
@@ -158,7 +186,7 @@ d3.selection.prototype.template = (template) ->
                 build s, template, state
 
       s      
-  reduce = (path, d, state) ->
+  reduce = (path, d, state, s) ->
     if typeof path == 'string' and path[0] in ['@',':']
       if path in ['@']
         d
@@ -167,10 +195,16 @@ d3.selection.prototype.template = (template) ->
       else
         if path[0] == ':'
           d = window
+        else if path.slice(0,5) == '@this'
+          d = s.node()
+          path = ['@',path.slice(6)].join ''
         path.slice 1
             .split '.'
             .reduce (p,k)->
-              p[k]
+              if typeof p[k] == 'function'
+                p[k]()
+              else
+                p[k]
             , d 
     else
       #{path has data}
