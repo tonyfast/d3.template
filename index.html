@@ -186,8 +186,9 @@
 
         if(hash()){
           templateUrl.property("value", hash());
+          templateUrl.on("change")();
         }
-        templateUrl.on("change")();
+        
 
         function hash(value){
           if(value){
@@ -203,7 +204,7 @@
 
         function load(){
           d3.text(hash(), 'text/yaml', function(d){
-            editor.setValue('');
+            editor.setValue(d);
           });
         }
 
