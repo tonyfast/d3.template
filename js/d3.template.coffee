@@ -19,11 +19,15 @@ d3.selection.prototype.template = (template) ->
   
   build = ( s, t, state) ->
     if not state
-      state = 
-        i: null
-        callback: (d)->d
+      state = {}    
     t.forEach (t) ->
       t = d3.entries(t)[0]
+      args = t.key.split('.')
+      if args.length > 1 and d3['scales'] and d3['scales'][ args.slice(-1)[0] ]
+        state.callback = d3['scales'][ args.slice(-1)[0] ]
+        t.key = args.slice(0,-1).join('')
+      else
+        state.callback = (d) -> d
       if rules[t.key]
         s = rules[t.key]( s, t.value, state )
       else if t.key in ['selectAll','select']
@@ -191,23 +195,22 @@ d3.selection.prototype.template = (template) ->
       if path in ['@']
         d
       else if path in ['@i']
-        state.i
+        d = state.i
       else
         if path[0] == ':'
           d = window
         else if path.slice(0,5) == '@this'
           d = s.node()
           path = ['@',path.slice(6)].join ''
-        path.slice 1
+        d = path.slice 1
             .split '.'
             .reduce (p,k)->
-              if typeof p[k] == 'function'
-                p[k]()
-              else
                 p[k]
             , d 
     else
       #{path has data}
-      path
+      d = path
+    #{ apply scales}
+    state.callback d 
     
   build @, template
