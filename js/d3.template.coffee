@@ -57,7 +57,7 @@ d3.selection.prototype.template = (template) ->
                   t.value = d3.extent d, (_d,i) ->
                     state.i = i
                     v = reduce( _t.value, _d, state, s)
-                    if v['trim']
+                    if v and v['trim']
                       v = parseFloat v.trim()
                     v
                 d3['scales'][t.key][_t.key] reduce( t.value, d, state, s)
@@ -210,6 +210,8 @@ d3.selection.prototype.template = (template) ->
     else
       #{path has data}
       d = path
+    if typeof d == 'function' and typeof d() == 'function'
+      d = d()
     #{ apply scales}
     state.callback d 
     
