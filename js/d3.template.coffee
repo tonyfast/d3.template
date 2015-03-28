@@ -45,7 +45,8 @@ d3.selection.prototype.template = (template) ->
           if not d3['scales']
             d3['scales'] = {}
           else if typeof t.value == 'object'
-            d3['scales'][t.key] = d3.scale.linear()
+            if not d3['scales'][t.key]
+              d3['scales'][t.key] = d3.scale.linear()
             d3.entries t.value
               .forEach (_t) ->
                 if Array.isArray( _t.value )
