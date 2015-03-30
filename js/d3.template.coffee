@@ -1,7 +1,7 @@
 ---
 ---
 
-d3.selection.prototype.template = (template) ->
+d3.selection.prototype.template = (template, callback) ->
   ###
   d3.[selection].template extends a d3 selection by 
   iterating over an object that contains repeatable d3 
@@ -16,7 +16,7 @@ d3.selection.prototype.template = (template) ->
 
   d3.selection.template modifies d3.selection.prototype.template and d3.requests
   ###
-  
+      
   build = ( s, t, state) ->
     if not state
       state = {}    
@@ -216,4 +216,12 @@ d3.selection.prototype.template = (template) ->
     #{ apply scales}
     state.callback d 
     
-  build @, template
+  unless callback
+    callback = (x)->x
+  d3.entries template
+    .forEach (d) ->
+      unless d3['templates']
+        d3['templates'] = {}
+      d3.templates[d.key] = d.value
+  build @, callback( template )
+  
