@@ -25,6 +25,11 @@
   <body>
     <script id="layout" type="text/yaml">
     build:
+    - call: 
+      - template: :d3.templates.tabs
+
+    - call: 
+      - template: :d3.templates.navbar
     - call:
       - append: $div.row#preview
       - call:
@@ -61,6 +66,82 @@
             - attr:
                 for: template-url
             - text: Template URL
+            
+    navbar:
+    - append: $nav.lime
+    - style:
+        bottom: 0px
+        position: fixed
+    - call:
+      - append: $div.nav-wrapper
+      - call:
+        - append: $div.cm-actions.right
+        - datum: 
+          - Show Editor Tabs
+        - template: :d3.templates.list
+
+      - call:
+        - append: $div.d3-actions.left
+        - datum: 
+          - templates
+          - requests
+          - domains   
+        - template: :d3.templates.list
+
+    list: 
+    - append: $ul.right
+    - selectAll: li
+    - data: '@'
+    - call: 
+      - enter:
+      - append: $li
+      - append: $a.flow-text
+      - attr:
+          id: '@'
+      - text: '@'
+
+    brand:
+    - call:  
+      - append: $a.brand-logo.left.lime.darken-3
+      - text: d3.template
+      - attr:
+          href: '#'
+          
+    tabs:
+    - append: $div.row
+    - datum:
+      - name: preview
+        href: '#preview-tab'
+        id: 'preview-tab'
+        bod: jerz
+      - name: html
+        href: '#html-tab'
+        id: 'html-tab'
+        bod: t-bone
+    - call:
+      - append: $div.s12.tab-list
+      - append: $ul.tabs
+      - selectAll: li
+      - data: '@'
+      - call:
+        - enter: 
+        - append: $li.tab.col.s6
+        - append: $a
+        - each:
+          - attr: 
+              href: '@href'
+        - text: '@name'
+    - call:
+      - selectAll: .tab-body
+      - data: '@'
+      - call: 
+        - enter:
+        - append: $div.col.s12.tab-body
+        - attr:   
+            id: '@id'
+        - text: '@bod'
+    - call:
+      - js: $('.tab-list .tabs').tabs();
     </script>
 
     <!-- Deploy -->
@@ -121,7 +202,7 @@
       ;( function(){
         d3.select('body')
           .template( 
-            jsyaml.load( d3.select('#layout').html() )['build']
+            jsyaml.load( d3.select('#layout').html() ), function(d){ return d.build }
           )
         var toolbarHeight = 68,
           showEditor = 1;
@@ -209,11 +290,12 @@
         }
 
         function update(){
-          d3templates = jsyaml.load( editor.getValue() );
 
           preview.call( function(s){
             s.html('')
-             .template( d3templates.display )
+             .template(  
+              jsyaml.load( editor.getValue() ), function(d){ return d.display } 
+            )
           });
         }
 
