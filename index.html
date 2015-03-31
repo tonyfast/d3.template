@@ -31,23 +31,9 @@
     - call: 
       - template: :d3.templates.navbar
     - call:
-      - append: $div.row#preview
-      - call:
-        - append: $div.container
-        - call:
-          - append: h5
-          - text: This tool creates webpages by the key stroke.
-        - call:
-          - append: $p.flow-text
-          - text: Mark up the YAML editor with d3-like commands to build a DOM with inline data.
-    - call:
       - append: $div.mode#template
     - call:
       - append: $div.col#toolbar
-      - call:
-        - append: $a.waves-effect.waves-light.btn.col.s2#toggle
-        - call:
-          - append: $i.mdi-image-edit
       - call:
         - append: $a.waves-effect.waves-light.btn.col.s2#preview-toggle
         - text: HTML
@@ -66,6 +52,17 @@
             - attr:
                 for: template-url
             - text: Template URL
+    preview:
+    - call:
+      - append: $div.row#preview
+      - call:
+        - append: $div.container
+        - call:
+          - append: h5
+          - text: This tool creates webpages by the key stroke.
+        - call:
+          - append: $p.flow-text
+          - text: Mark up the YAML editor with d3-like commands to build a DOM with inline data.
             
     navbar:
     - append: $nav.lime
@@ -77,15 +74,21 @@
       - call:
         - append: $div.cm-actions.right
         - datum: 
-          - Show Editor Tabs
+          - name: Hide Tabs
+            id: '#toggle-tabs'
+          - name: Show Editor
+            id: '#toggle-editor'
         - template: :d3.templates.list
 
       - call:
         - append: $div.d3-actions.left
         - datum: 
-          - templates
-          - requests
-          - domains   
+          - name: templates
+            id: '#template-modal'
+          - name: requests
+            id: '#request-modal'
+          - name: domains
+            id: '#domain-modal'
         - template: :d3.templates.list
 
     list: 
@@ -97,8 +100,8 @@
       - append: $li
       - append: $a.flow-text
       - attr:
-          id: '@'
-      - text: '@'
+          id: '@id'
+      - text: '@name'
 
     brand:
     - call:  
@@ -139,9 +142,12 @@
         - append: $div.col.s12.tab-body
         - attr:   
             id: '@id'
-        - text: '@bod'
     - call:
       - js: $('.tab-list .tabs').tabs();
+    - call:
+      # template will get executed on click in service
+      - select: '#preview-tab'
+      - template: :d3.templates.preview
     </script>
 
     <!-- Deploy -->
@@ -226,7 +232,7 @@
 
 
 
-        d3.selectAll('#toggle')
+        d3.selectAll('#toggle-editor')
           .on('click', function(){
             template.style('display',
               (showEditor = !showEditor) ? "block" : "none"
