@@ -84,11 +84,11 @@
         - append: $div.d3-actions.left
         - datum: 
           - name: templates
-            id: '#template-modal'
+            id: 'template-modal'
           - name: requests
-            id: '#request-modal'
+            id: 'request-modal'
           - name: domains
-            id: '#domain-modal'
+            id: 'domain-modal'
         - template: :d3.templates.list
 
     list: 
@@ -148,7 +148,25 @@
       # template will get executed on click in service
       - select: '#preview-tab'
       - template: :d3.templates.preview
+      
+    modal: 
+    - append: $div.modal#modal-box
+    - call:
+      - append: $div.modal-content
+      - call:
+        - append: h4  
+        - text: Modal Header  
+      - call:
+        - append: p
+        - text: A bunch of text
+    - call:
+      - append: $div.modal-footer
+      - append: $a.waves-effect.waves-green.btn-flat.modal-action.modal-close##
+      - text: close
+    - call:
+      - js: "$('.modal-trigger').leanModal()" 
     </script>
+    
 
     <!-- Deploy -->
     <script src="//cdn.jsdelivr.net/g/d3js,jquery">
