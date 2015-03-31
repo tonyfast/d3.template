@@ -228,6 +228,17 @@
           .template( 
             jsyaml.load( d3.select('#layout').html() ), function(d){ return d.build }
           )
+        
+        d3.select('#template-modal')
+          .classed('modal-trigger',true)
+          .attr('href','#modal-box')
+        
+        d3.select('body')
+          .template( 
+            d3.templates, function(d){ return d.modal }
+          )
+        
+        
         var toolbarHeight = 68,
           showEditor = 1;
 
