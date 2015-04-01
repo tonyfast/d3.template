@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="bower_components/d3/d3.min.js"></script>
+    <script src="js/d3.template.js"></script>
+    <style>
+      @import 'bower_components/primer-css/css/primer.css';
+      @import 'bower_components/octicons/octicons/octicons.css';
+    </style>
+    <style>
+      .btn-group#controller{
+        margin: 20px;
+      }
+      #menu-modal{}
+      #assets-modal{}
+      #newtemp-modal{}
+      #editor-modal{}
+      #modal{
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        background-color: #white;
+        padding: 0;
+        max-height: 70%;
+        width: 55%;
+        margin: auto;
+        overflow-y: auto;
+        z-index: 1000;
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+        background-clip: padding-box;
+      }
+      .modal .modal-body {
+        display: 'block';
+        border: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controller" class="btn-group">
+      <button id="menu-trigger" class="btn modal-trigger" type="button">
+          <!-- change type and view -->
+          <span class="mega-octicon octicon-three-bars"></span>
+      </button>
+
+      <button id="asset-trigger" class="btn modal-trigger" type="button">
+          <span class="mega-octicon octicon-graph"></span>
+      </button>
+
+      <button id="template-trigger" class="btn modal-trigger" type="button">
+          <span class="mega-octicon octicon-link-external"></span>
+      </button>
+      <!--
+      <button id="editor-trigger" class="btn" type="button">
+          <span class="mega-octicon octicon-pencil"></span>
+      </button>
+      -->
+      
+    </div>
+    <div id="modal" class="modal container clearfix">
+      <div class="modal-body">
+        <h2>Title</h2>
+        <ul class="filter-list"></ul>
+      </div>  
+    </div>
+    <script>
+      ;( function(){
+        nav = d3.select('nav')
+          .style('position','fixed')
+          .style('width', function(){
+            return this.offsetWidth*1.7+'px';
+          })
+          .style('left', function(){
+            return -1 * this.offsetWidth + 'px'
+          })
+        
+        d3.select('body')
+          .append('div')
+          .style('left','0px')
+          .style('top','0px')
+          .style('position','fixed')
+          .style('height','100%')
+          .style('width','60px')
+          .on( 'mouseenter', function(e){
+            nav.style('left', function(){
+              return 0 + 'px'
+            })
+          })
+          .on( 'mousemove', function(e){
+            nav.style('left', -1*d3.event.pageX+'px')
+          })
+          .on( 'mouseleave', function(e){
+            nav.style('left', function(){
+              return -1 * this.offsetWidth + 'px'
+            })
+          })
+        
+        modal = d3.select('#modal')
+        
+        d3.selectAll('.modal-trigger')
+          .on( 'click', function(d){
+              var id = d3.select(this).attr('id').split('-')[0];
+              
+              if ( id == 'menu'){
+                var dat = [
+                  'Markdown',
+                  'HTML',
+                  'Editor',
+                ]
+              } else if ( id == 'asset'){
+                var dat = [
+                  'Thing 1',
+                  'thing',
+                ]
+              } else if ( id == 'template')
+                var dat = [
+                  'a',
+                  'b',
+                  'd',
+                  'q',
+                ]
+                
+            if (modal.style('display') == 'none'){
+              modal.style('display','block')
+                   .datum({
+                      id: id,
+                    });
+              UpdateModal(dat);
+            } else if (modal.datum() && modal.datum()['id'] && id != modal.datum()['id'] ){
+                modal.datum({
+                  id: id,
+                });
+                UpdateModal(dat);
+            } else {
+              modal.style('display','none')
+            }
+          })
+        
+        function UpdateModal(dat){
+          modal.select('ul.filter-list')
+            .selectAll('li')
+            .data(dat)
+            .call( function(s){
+               s.enter()
+                .append('li')
+                .append('a')
+                .classed('filter-item',true)
+                .attr('href','#')
+               
+               s.exit()
+                .remove();
+            })
+            .each( function(s){
+               d3.select(this)
+                .select('a.filter-item')     
+                .on('click',function(){
+                  modal.style('display','none') 
+                })
+                .text( function(d){
+                  return d;
+                })
+                
+                
+            })
+        }
+      })();
+    </script>
+  </body>
+</html>
