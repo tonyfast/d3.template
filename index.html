@@ -24,7 +24,7 @@
       @import "bower_components/materialize/dist/css/materialize.min.css";
     </style-->
     <link type="text/css" rel="stylesheet" href='http://cdn.rawgit.com/primer/primer/master/css/primer.css'>
-    <link type="text/css" rel="stylesheet" href='http://cdn.rawgit.com/github/octicons/master/octicons/octicons.css'>
+    <link type="text/css" rel="stylesheet" href='http://cdn.  rawgit.com/github/octicons/master/octicons/octicons.css'>
     <style>
       @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/codemirror.min.css";
       @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/theme/blackboard.css";
@@ -100,14 +100,17 @@
     - append: h2
     - html: '<code>d3.template</code> is an extension of the powerful <a href="d3js.org">d3js</a> library.'     
   - child: 
-    - append: $div.container
-    - append: $p.lead
-    - text: Start typing in the editor to modify this webpage in real-time using d3-like syntaxes.
+    - template: :d3.templates.text
   - child:
     - append: $div.container
     - child:
       - append: $h3
       - html: "<a href='http://primercss.io/'>Github Primer</a> stylesheets are already available to simplify styling."
+
+text:
+- append: $div.container
+- append: $p.lead
+- text: Start typing in the editor to modify this webpage in real-time using d3-like syntaxes.
 </script>
 
     <div id="controller" class="btn-group">
