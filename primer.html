@@ -3,6 +3,7 @@
   <head>
     <script src="bower_components/d3/d3.min.js"></script>
     <script src="js/d3.template.js"></script>
+    <script src="bower_components/js-yaml/dist/js-yaml.js"></script>
     <style>
       @import 'bower_components/primer-css/css/primer.css';
       @import 'bower_components/octicons/octicons/octicons.css';
@@ -99,45 +100,31 @@
         
         modal = d3.select('#modal')
         
-        d3.selectAll('.modal-trigger')
-          .on( 'click', function(d){
-              var id = d3.select(this).attr('id').split('-')[0];
-              
-              if ( id == 'menu'){
-                var dat = [
-                  'Markdown',
-                  'HTML',
-                  'Editor',
-                ]
-              } else if ( id == 'asset'){
-                var dat = [
-                  'Thing 1',
-                  'thing',
-                ]
-              } else if ( id == 'template')
-                var dat = [
-                  'a',
-                  'b',
-                  'd',
-                  'q',
-                ]
-                
-            if (modal.style('display') == 'none'){
-              modal.style('display','block')
-                   .datum({
-                      id: id,
-                    });
-              UpdateModal(dat);
-            } else if (modal.datum() && modal.datum()['id'] && id != modal.datum()['id'] ){
-                modal.datum({
-                  id: id,
-                });
+        d3.text( 'ui.yml', function(_d){
+          
+          _d = jsyaml.load( _d );
+          
+          d3.selectAll('.modal-trigger')
+            .on( 'click', function(d){
+                var id = d3.select(this).attr('id').split('-')[0];
+
+              var dat = _d[id];
+              if (modal.style('display') == 'none'){
+                modal.style('display','block')
+                     .datum({
+                        id: id,
+                      });
                 UpdateModal(dat);
-            } else {
-              modal.style('display','none')
-            }
-          })
-        
+              } else if (modal.datum() && modal.datum()['id'] && id != modal.datum()['id'] ){
+                  modal.datum({
+                    id: id,
+                  });
+                  UpdateModal(dat);
+              } else {
+                modal.style('display','none')
+              }
+            })
+        })
         function UpdateModal(dat){
           modal.select('ul.filter-list')
             .selectAll('li')
@@ -159,12 +146,13 @@
                   modal.style('display','none') 
                 })
                 .text( function(d){
-                  return d;
+                  return d.name;
                 })
                 
                 
             })
         }
+        
       })();
     </script>
   </body>
