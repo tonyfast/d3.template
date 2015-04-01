@@ -1,345 +1,320 @@
----
----
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
   <head>
+    <script src="bower_components/d3/d3.min.js"></script>
+    <script src="js/d3.template.js"></script>
+    <script src="bower_components/js-yaml/dist/js-yaml.js"></script>
+    <script src="bower_components/jquery/dist/jquery.min.js">
+      </script>
+    <script src="bower_components/codemirror/lib/codemirror.js">
+      </script>
+    <script src="bower_components/codemirror/mode/yaml/yaml.js">
+      </script>
+    <script src="bower_components/codemirror/addon/fold/foldcode.js">
+      </script>
+    <script src="bower_components/codemirror/addon/fold/foldgutter.js">
+      </script>
+    <script src="bower_components/codemirror/addon/fold/indent-fold.js">
+      </script>
+    <script src="bower_components/codemirror/addon/fold/comment-fold.js">
+      </script>
+    <!--style>
+      @import "bower_components/materialize/dist/css/materialize.min.css";
+    </style-->
     <style>
-      /* Deploy */
-      @import "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/css/materialize.min.css";
-      @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/codemirror.min.css";
-      @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/theme/blackboard.css";
-      @import "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/foldgutter.css";
-      
-      
-      
-      /* Development 
-      @import "/bower_components/materialize/dist/css/materialize.min.css";
-      @import "/bower_components/codemirror/lib/codemirror.css";
-      @import "/bower_components/codemirror/theme/blackboard.css";
-      @import "/bower_components/codemirror/addon/fold/foldgutter.css";
-      */
-      
-      @import "{{site.baseurl}}/css/app.css"
+      @import 'bower_components/primer-css/css/primer.css';
+      @import 'bower_components/octicons/octicons/octicons.css';
+    </style>
+    <style>
+      @import "bower_components/codemirror/lib/codemirror.css";
+      @import "bower_components/codemirror/theme/blackboard.css";
+      @import "bower_components/codemirror/addon/fold/foldgutter.css";
+    </style>
+    <style>
+      .btn-group#controller{
+        margin: 20px;
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        opacity: .6;
+        z-index: 1000;
+      }
+      #menu-modal{}
+      #assets-modal{}
+      #newtemp-modal{}
+      #editor-modal{}
+      #modal{
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        background-color: white;
+        padding: 0;
+        max-height: 70%;
+        width: 55%;
+        margin: auto;
+        overflow-y: auto;
+        z-index: 1000;
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+        background-clip: padding-box;
+        opacity: .9;
+      }
+      .modal .modal-body {
+        display: 'block';
+        border: 24px;
+      }
+      #editor-block{
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 40px;
+        bottom: 20px;
+        margin: auto;
+        width: 60%;
+        padding: 0;
+        border-radius: 2px;
+        background-clip: padding-box;
+        opacity: .25;
+        height: 100%;
+        z-index: 600;
+      }
+      /**
+      .CodeMirror {
+        height: auto;
+      }
+      **/
     </style>
   </head>
   <body>
-    <script id="layout" type="text/yaml">
-    build:
-    - call: 
-      - template: :d3.templates.tabs
+    <script id="initial" type="text/yaml">display:
+- child:  
+  - append: $div.container
+  - append: h1
+  - text: d3.template playground
+- child:  
+  - append: $div.container
+  - append: $div.blankslate
+  - child:
+    - append: h2
+    - html: '<code>d3.template</code> is an extension of the powerful <a href="d3js.org">d3js</a> library.'     
+  - child: 
+    - append: $div.container
+    - append: $p.lead
+    - text: Start typing in the editor to modify this webpage in real-time using d3-like syntaxes.
+  - child:
+    - append: $div.container
+    - child:
+      - append: $h3
+      - html: "<a href='http://primercss.io/'>Github Primer</a> stylesheets are already available to simplify styling."
+</script>
 
-    - call: 
-      - template: :d3.templates.navbar
-    - call:
-      - append: $div.mode#template
-    - call:
-      - append: $div.col#toolbar
-      - call:
-        - append: $a.waves-effect.waves-light.btn.col.s2#preview-toggle
-        - text: HTML
-      - call:
-        - append: $div.row
-        - call:
-          - append: $div.input-field.col.s10.download
-          - call:
-            - append: $i.mdi-file-file-download prefix
-          - call:
-            - append: $input.validate#template-url
-            - attr:
-                type: text
-          - call:
-            - append: $label
-            - attr:
-                for: template-url
-            - text: Template URL
-    preview:
-    - call:
-      - append: $div.row#preview
-      - call:
-        - append: $div.container
-        - call:
-          - append: h5
-          - text: This tool creates webpages by the key stroke.
-        - call:
-          - append: $p.flow-text
-          - text: Mark up the YAML editor with d3-like commands to build a DOM with inline data.
-            
-    navbar:
-    - append: $nav.lime
-    - style:
-        bottom: 0px
-        position: fixed
-    - call:
-      - append: $div.nav-wrapper
-      - call:
-        - append: $div.cm-actions.right
-        - datum: 
-          - name: Hide Tabs
-            id: '#toggle-tabs'
-          - name: Show Editor
-            id: '#toggle-editor'
-        - template: :d3.templates.list
+    <div id="controller" class="btn-group">
+      <button id="menu-trigger" class="btn modal-trigger" type="button">
+          <!-- change type and view -->
+          <span class="mega-octicon octicon-three-bars"></span>
+      </button>
+      <!--
+      <button id="asset-trigger" class="btn modal-trigger" type="button">
+          <span class="mega-octicon octicon-graph"></span>
+      </button>
 
-      - call:
-        - append: $div.d3-actions.left
-        - datum: 
-          - name: templates
-            id: 'template-modal'
-          - name: requests
-            id: 'request-modal'
-          - name: domains
-            id: 'domain-modal'
-        - template: :d3.templates.list
+      <button id="template-trigger" class="btn modal-trigger" type="button">
+          <span class="mega-octicon octicon-link-external"></span>
+      </button>
 
-    list: 
-    - append: $ul.right
-    - selectAll: li
-    - data: '@'
-    - call: 
-      - enter:
-      - append: $li
-      - append: $a.flow-text
-      - attr:
-          id: '@id'
-      - text: '@name'
-
-    brand:
-    - call:  
-      - append: $a.brand-logo.left.lime.darken-3
-      - text: d3.template
-      - attr:
-          href: '#'
-          
-    tabs:
-    - append: $div.row
-    - datum:
-      - name: preview
-        href: '#preview-tab'
-        id: 'preview-tab'
-        bod: jerz
-      - name: html
-        href: '#html-tab'
-        id: 'html-tab'
-        bod: t-bone
-    - call:
-      - append: $div.s12.tab-list
-      - append: $ul.tabs
-      - selectAll: li
-      - data: '@'
-      - call:
-        - enter: 
-        - append: $li.tab.col.s6
-        - append: $a
-        - each:
-          - attr: 
-              href: '@href'
-        - text: '@name'
-    - call:
-      - selectAll: .tab-body
-      - data: '@'
-      - call: 
-        - enter:
-        - append: $div.col.s12.tab-body
-        - attr:   
-            id: '@id'
-    - call:
-      - js: $('.tab-list .tabs').tabs();
-    - call:
-      # template will get executed on click in service
-      - select: '#preview-tab'
-      - template: :d3.templates.preview
+      <button id="editor-trigger" class="btn" type="button">
+          <span class="mega-octicon octicon-pencil"></span>
+      </button>
+      -->
       
-    modal: 
-    - append: $div.modal#modal-box
-    - call:
-      - append: $div.modal-content
-      - call:
-        - append: h4  
-        - text: Modal Header  
-      - call:
-        - append: p
-        - text: A bunch of text
-    - call:
-      - append: $div.modal-footer
-      - append: $a.waves-effect.waves-green.btn-flat.modal-action.modal-close##
-      - text: close
-    - call:
-      - js: "$('.modal-trigger').leanModal()" 
-    </script>
-    
-
-    <!-- Deploy -->
-    <script src="//cdn.jsdelivr.net/g/d3js,jquery">
-      </script>
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/codemirror.js">
-      </script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/mode/yaml/yaml.js">
-      </script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/foldcode.js">
-      </script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/foldgutter.js">
-      </script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/indent-fold.js">
-      </script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.0.0/addon/fold/comment-fold.js">
-      </script>
-
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/js/materialize.min.js">
-      </script>
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/js-yaml/3.2.7/js-yaml.min.js">
-      </script>
+    </div>
+    <div id="modal" class="modal container clearfix">
+      <div class="modal-body">
+        <h2>d3.template playground</h2>
+        <ul class="filter-list"></ul>
+      </div>  
+    </div>
     
     
-    <!-- Development 
-    <script src="/bower_components/d3/d3.min.js">
-          </script>
-    <script src="/bower_components/jquery/dist/jquery.min.js">
-          </script>
-    <script src="/bower_components/codemirror/lib/codemirror.js">
-          </script>
-    <script src="/bower_components/codemirror/mode/yaml/yaml.js">
-      </script>
-    <script src="/bower_components/codemirror/addon/fold/foldcode.js">
-      </script>
-    <script src="/bower_components/codemirror/addon/fold/foldgutter.js">
-      </script>
-    <script src="/bower_components/codemirror/addon/fold/indent-fold.js">
-      </script>
-    <script src="/bower_components/codemirror/addon/fold/comment-fold.js">
-      </script>
-    <script src="/bower_components/materialize/dist/js/materialize.min.js">
-      </script>
-    <script src="/bower_components/js-yaml/dist/js-yaml.min.js">
-      </script>
-    -->
+    <div id="editor-block">
+      <a class='hider'>close</a>
+      <div id="editor-text"></div>
+    </div>
+    <div id="preview-block"></div>
     
-    <script src="{{site.baseurl}}/js/d3.template.js">
-      </script>
-    <script src="{{site.baseurl}}/js/d3.gridder.js">
-      </script>
-
-
+    
     <script>
       ;( function(){
+        nav = d3.select('nav')
+          .style('pos ition','fixed')
+          .style('width', function(){
+            return this.offsetWidth*1.7+'px';
+          })
+          .style('left', function(){
+            return -1 * this.offsetWidth + 'px'
+          })
+        
         d3.select('body')
-          .template( 
-            jsyaml.load( d3.select('#layout').html() ), function(d){ return d.build }
-          )
+          .append('div')
+          .style('left','0px')
+          .style('top','0px')
+          .style('position','fixed')
+          .style('height','100%')
+          .style('width','60px')
+          .on( 'mouseenter', function(e){
+            nav.style('left', function(){
+              return 0 + 'px'
+            })
+          })
+          .on( 'mousemove', function(e){
+            nav.style('left', -1*d3.event.pageX+'px')
+          })
+          .on( 'mouseleave', function(e){
+            nav.style('left', function(){
+              return -1 * this.offsetWidth + 'px'
+            })
+          })
         
-        d3.select('#template-modal')
-          .classed('modal-trigger',true)
-          .attr('href','#modal-box')
-        
-        d3.select('body')
-          .template( 
-            d3.templates, function(d){ return d.modal }
-          )
-        
-        
-        var toolbarHeight = 68,
-          showEditor = 1;
-
-        var template = d3.select('#template'),
-          preview = d3.select('#preview'),
-          templateUrl = d3.select("#template-url"),
-          win = d3.select(window);
-
-        var editor = CodeMirror(template.node(), {
-          theme: "blackboard",
-          mode: "yaml",
-          lineNumbers: true,
-          lineWrapping: true,
-          extraKeys: {"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); }},
-          foldGutter: {
-            rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.indent, CodeMirror.fold.comment)
-          },
-          gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-        });
-
-
-
-        d3.selectAll('#toggle-editor')
-          .on('click', function(){
-            template.style('display',
-              (showEditor = !showEditor) ? "block" : "none"
-            );
+        d3.select('#editor-block')
+          .on('click',function(){
+            
+            if (d3.select(this).style('opacity') != '.75'){
+              d3.select(this).style('opacity','.75')
+            }
           });
         
-        d3.selectAll('#preview-toggle')
-          .datum( 'HTML' )
-          .on( 'click', function(d){
-             if (d == 'HTML'){
-               d3.select('#preview')
-                 .text( function(){
-                    return this.innerHTML
-                 })
-               
-               d3.select(this)
-                 .datum( 'preview')
-                 .text( function(d){ return d;})
-             } else if ( d== 'preview' ){
-               d3.select('#preview')
-                 .html( function(){
-                    return this.innerText
-                 })
-               d3.select(this)
-                 .datum( 'HTML')
-                 .text( function(d){ return d;})
+        modal = d3.select('#modal');
+        
+        d3.text( 'ui.yml', function(_d){
+          
+          _d = jsyaml.load( _d );
+          
+          d3.selectAll('.modal-trigger')
+            .on( 'click', function(d){
+                var id = d3.select(this).attr('id').split('-')[0];
 
-             }
+              var dat = _d[id];
+              if (modal.style('display') == 'none'){
+                modal.style('display','block')
+                     .datum({
+                        id: id,
+                      });
+                UpdateModal(dat);
+              } else if (modal.datum() && modal.datum()['id'] && id != modal.datum()['id'] ){
+                  modal.datum({
+                    id: id,
+                  });
+                  UpdateModal(dat);
+              } else {
+                modal.style('display','none')
+              }
+            })
+        })
+        function UpdateModal(dat){
+          modal.select('ul.filter-list')
+            .selectAll('li')
+            .data(dat)
+            .call( function(s){
+               s.enter()
+                .append('li')
+                .append('a')
+                .classed('filter-item',true)
+                .attr('href','#')
                
+               s.exit()
+                .remove();
+            })
+            .each( function(s){
+               d3.select(this)
+                .select('a.filter-item')     
+                .attr('id',function(d){return d.id;})     
+                /**.on('click',function(){
+                 
+                  modal.style('display','none') 
+                  
+                })**/
+                .text( function(d){
+                  return d.name;
+                })
+            })        
+
+          d3.select('#editor-trigger')
+            .on('click',function(d){
+              modal.style('display','none');
+              d3.select('#editor-block')
+                .style('display','block');              
+            });
+
+          d3.select('#html-trigger')
+            .on('click',function(d){
+              var p = d3.select('#preview-block');
+              if (p.datum()['state']!='html'){
+                p.datum( function(d){
+                  d['state'] = 'html'
+                  return d
+                })
+                update();
+              }
+            });
+
+          d3.select('#raw-trigger')
+            .on('click',function(d){
+              var p = d3.select('#preview-block');
+              if (p.datum()['state']!='raw'){
+                p.datum( function(d){
+                  d['state'] = 'raw'
+                  return d
+                })
+                update();
+              }
+            });
+
+          
+
+        }
+        editor = CodeMirror(d3.select('#editor-text').node(), {
+              theme: "blackboard",
+              mode: "yaml",
+              lineNumbers: true,
+              lineWrapping: true,
+              extraKeys: {"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); }},
+              foldGutter: {
+                rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.indent, CodeMirror.fold.comment)
+              },
+              gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+        
+        editor.setValue(d3.select('#initial').html())
+        editor.on('change', update);
+        preview = d3.select('#preview-block');
+        preview.datum({
+          state: 'html'
+        })
+        function update(){
+          d3.select('#preview-block').call( function(s){
+            if( s.datum()['state'] == 'html' ){
+              s.html('')
+               .template(  
+                jsyaml.load( editor.getValue() ), function(d){ return d.display } 
+              )
+            } else if ( s.datum()['state'] == 'raw' ){
+              
+              s.text( function(){
+                return this.innerHTML
+              })
+            }
+          });
+        }
+        
+        d3.select('.hider')
+          .on('click', function(d){
+            d3.select(this.parentNode)
+              .style('display','none')
           })
 
-        editor.on('change', update);
-        win.on("resize", resize);
-        templateUrl.on("change", updateHash);
-        win.on("hashchange", load)
-
-        win.on("resize")();
-
-        if(hash()){
-          templateUrl.property("value", hash());
-          templateUrl.on("change")();
-        }
-        
-
-        function hash(value){
-          if(value){
-            window.location.hash = value;
-          }
-          return window.location.hash.slice(1);
-        }
-
-        function updateHash(){
-          hash(templateUrl.property("value"));
-          win.on("hashchange")()
-        }
-
-        function load(){
-          d3.text(hash(), 'text/yaml', function(d){
-            editor.setValue(d);
-          });
-        }
-
-        function update(){
-
-          preview.call( function(s){
-            s.html('')
-             .template(  
-              jsyaml.load( editor.getValue() ), function(d){ return d.display } 
-            )
-          });
-        }
-
-        function resize(){
-          editor.setSize(
-            null,
-            (win.node().innerHeight - toolbarHeight) + "px"
-          )
-        }
+        update();
       })();
     </script>
   </body>
