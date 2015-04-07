@@ -16,6 +16,8 @@
   - child: 
     - append: h2
     - text: d3.template playground
+  - child: 
+    - append: $ul.filter-list
 - child:
   - append: $div#editor-block
   - child: 
@@ -48,4 +50,3 @@
         main: js/app.js
         call:
         - js: update();
-

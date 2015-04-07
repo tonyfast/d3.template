@@ -11,6 +11,10 @@
     <script>
       ;( function(){
         template = [];
+        d3['callback']['yaml'] = function(d){
+          return jsyaml.load(d);
+        }
+        
         d3.text( 'templates/template-editor.yaml', function(d){
           template =  jsyaml.load( d );
           d3.select('body')
