@@ -1,0 +1,18 @@
+menu:
+- name: Preview
+  id: html-trigger
+- name: Raw HTML
+  id: raw-trigger
+- name: Editor
+  id: editor-trigger
+  asset:
+  - name: Requests
+    id: 
+  - name: Templates
+    id: 
+  - name: Domains
+    id: 
+  template:
+  - name: links
+    id:
+  
