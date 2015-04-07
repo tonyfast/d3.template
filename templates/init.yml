@@ -1,8 +1,10 @@
 display:
 - child:  
   - append: $div.container
-  - append: h1
-  - text: d3.template playground
+  - html.markdownify: |
+      # d3.template playground
+      
+      __Made__ with a *markdown* ``callback``
 - child:  
   - append: $div.container
   - append: $div.blankslate
