@@ -3,6 +3,8 @@
   <head>
     <script src="//cdn.jsdelivr.net/g/d3js">
       </script>
+    <script src="bower_components/marked/marked.min.js">
+      </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/js-yaml/3.2.7/js-yaml.min.js">
       </script>
     <script src="js/d3.template.js"></script>
@@ -11,9 +13,12 @@
     <script>
       ;( function(){
         template = [];
-        d3['callback']= {
+        d3['callbacks']= {
           yaml : function(d){
             return jsyaml.load(d);
+          },
+          markdownify: function(d){
+            return marked(d);
           }
         }
         

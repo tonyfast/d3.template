@@ -57,6 +57,14 @@ d3.selection.prototype.template = (template, callback,i) ->
         #{ alternate name for call}
         t.k = 'call'
         rule s, t
+      body: (s,t) ->
+        #{ alternate name for call}
+        d3.select document
+          .select 'body'
+          .template t.v
+      parent: (s,t) ->
+        d3.select s.node().parentElement
+          .template t.v
       requests: (s,t) ->
         unless d3['requests']
           d3['requests'] = {}
@@ -227,13 +235,10 @@ d3.selection.prototype.template = (template, callback,i) ->
       else if t.slice(0,2) == '@i'
         t = i
       else if t[0] == '@'
-        #{ local selection scope borrowed from CoffeeScript }
         t = reduceKey t, s.datum()
       else if t[0] == ':'
-        #{ global window context borrowed from Archie ML}
         t = reduceKey t, window
       else if t[0] == '\\'
-        #{ global window context borrowed from Archie ML}
         t = t.slice(1)
     else 
       t
@@ -248,10 +253,6 @@ d3.selection.prototype.template = (template, callback,i) ->
       v
       
   Execute = (s,t) ->
-    ###
-    1. Convert Template to key, value, callback
-    2. Execute Rule
-    ###
     t = parseArgs s, t
     rule s, t
   
