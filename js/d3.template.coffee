@@ -16,16 +16,20 @@ d3.getScript = ( src, callback ) ->
           callback()
   script.src = src  
   
-d3.selection.prototype.template = (template, callback,i) ->
+d3.selection.prototype.template = (template, callback,i,data) ->
   ### 
   template an array of objects.
   rules trigger d3 events and callback 
-  ###
+  ###  
   rule = (s,t) ->
     if config[t.k]
       s = config[t.k] s, t  
     else
-      if t.k in ['selectAll','select','data','datum','template']
+      if t.k in ['selectAll','select','datum','template']
+        s = s[t.k] t.f t.v
+      else if t.k in ['data']
+        if typeof t.v == 'object' and not Array.isArray t.v
+          t.v = d3.entries t.v
         s = s[t.k] t.f t.v
       else if t.k in ['call']
         s = s.call (s) ->
@@ -33,7 +37,7 @@ d3.selection.prototype.template = (template, callback,i) ->
       else if t.k in ['each']
         s = s.each (d,i) ->
           d3.select @
-            .template t.v,null,i
+            .template t.v,null,i,d
       else if t.k in ['append','insert']
         s = AppendDOM s, t
       else if t.k in ['attr','class','style','property','classed']
@@ -244,7 +248,9 @@ d3.selection.prototype.template = (template, callback,i) ->
       else if t.slice(0,2) == '@i'
         t = i
       else if t[0] == '@'
-        t = reduceKey t, s.datum()
+        unless data
+          data = s.datum()
+        t = reduceKey t, data
       else if t[0] == ':'
         t = reduceKey t, window
       else if t[0] == '\\'
