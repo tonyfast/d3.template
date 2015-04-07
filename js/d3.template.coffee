@@ -224,7 +224,7 @@ d3.selection.prototype.template = (template, callback,i) ->
       if t.slice(0,5) == '@this'
         t = t[0] + t.slice(5)
         t = reduceKey t, s.node()
-      if t.slice(0,2) == '@i'
+      else if t.slice(0,2) == '@i'
         t = i
       else if t[0] == '@'
         #{ local selection scope borrowed from CoffeeScript }
@@ -232,6 +232,9 @@ d3.selection.prototype.template = (template, callback,i) ->
       else if t[0] == ':'
         #{ global window context borrowed from Archie ML}
         t = reduceKey t, window
+      else if t[0] == '\\'
+        #{ global window context borrowed from Archie ML}
+        t = t.slice(1)
     else 
       t
     t
