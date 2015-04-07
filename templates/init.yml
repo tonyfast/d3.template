@@ -3,7 +3,7 @@ display:
   - append: $div.container
   - html.markdownify: 
     - |
-      # d3.template playground
+      # d3.template playground 
       
       __Made__ with a *markdown* ``callback``
       
