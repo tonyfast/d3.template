@@ -1,7 +1,7 @@
 - child:
   - append: $script#initial
   - requests:
-       init-template.text: init.yml
+       init-template.text: templates/init.yml
        call:
        - attr:  
            type: text/yaml

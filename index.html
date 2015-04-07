@@ -11,7 +11,7 @@
     <script>
       ;( function(){
         template = [];
-        d3.text( 'template-editor.yaml', function(d){
+        d3.text( 'templates/template-editor.yaml', function(d){
           template =  jsyaml.load( d );
           d3.select('body')
           .template( template )
