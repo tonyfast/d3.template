@@ -16,7 +16,7 @@
         
         modal = d3.select('#modal');
         
-        d3.text( 'ui.yml', function(_d){
+        d3.text( 'templates/ui.yml', function(_d){
           
           _d = jsyaml.load( _d );
           
