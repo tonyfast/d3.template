@@ -1,132 +1,46 @@
----
-layout: index
----
+It is very easy to extend ``d3js`` beyond SVG elements to a DOM manipulation tool.  At it's core, d3 adds ``__data__`` to selected DOM
+elements then it adds convenience functions to insert derivatives of this data into the DOM.
 
-# d3.template
+``d3js`` has a limited grammer and very repeatable syntaxes.  ``d3.template`` extends ``d3js`` to execute reusable patterns from structured data, typically YAML because it is easy to write.
 
-``d3.template`` is an extension to the d3.selection prototype.  
+[``d3.template``](https://github.com/tonyfast/d3.template/) traverses a large nested array of objects.  keys are equivalent to d3 commands with add-ons to get scripts, providers, stylesheets, and execute javascript.  The value is an value into the d3 method.
 
-# Usage
+## Example Templates
 
-## Sample Template
+Copy and paste these into the [wsywyg editor](http://tonyfast.com/d3.template/)
 
-    body:
-    - append: div
-    - attr: 
-        class: foo
-        id: ID
-    # child of div
-    - call:
-      - append: h3
-      - text: Bar
+* [https://gist.github.com/tonyfast/13e1e75081f73a118a9f](https://gist.github.com/tonyfast/13e1e75081f73a118a9f)
+* [https://gist.githubusercontent.com/tonyfast/49e2e2cbab5cf92fbe9f/raw/07b3996b14aa7f58300b7e12b2549fdca8978d64/.movie-domain.yml](Movie Data)
+* [Templates used for demo page](https://github.com/tonyfast/d3.template/tree/gh-pages/templates)
 
-## Brief Append
 
-``$`` operator
+## Append shorthand:
 
-    body:
-    - append: $div.foo#ID
-    - call:
-      - append: $h3
-      - text: Bar
-    
+    - append: $div.foo.bar.baz
 
-## Apply template to a selection
+Starting values with a ``$`` will make
 
-    templates = jsyaml.load(  d3.select('#manifest').html() )
 
-    d3.select('body')
-      .template( templates['body'] )
-
-### Resulting HTML 
-    
-
-    <div class="foo" id="ID">
-      <h3>
-        Bar
-      </h3>
+    <div class="foo bar" id="baz">
     </div>
     
-# Datum :: 
+## Callbacks 
 
-``datum`` binds and javascript object or value to a dom node and is available in the local scope.
+``key.baz.foo`` will applied the function ``d3.callbacks.baz.foo`` before the data
+is applied to the dom.  
 
-    list:
-    - append: $div.row
-    - call:
-      - append: $ul
-      - datum: 
-          bar: [baz, boom, bang]
-      - selectAll: 'li'
-      - data: '@bar'
-      - call:
-        - enter: 
-        - append: li 
-        - text: '@'
-    
-# Data :: Arrays
+Callbacks defintions start at the first period in a key.
 
-    body:
-    - append: $div.row
-    - call:
-      - append: $ul
-      - selectAll: li
-      - data: 
-        - red
-        - green
-        - blue
-      #d3 update pattern
-      - call:
-        - enter:
-        - append: $li
-        - each:
-          - text: '@'
-          - style:
-              font-color: '@'
 
-        
+## Value shortcuts:
 
-# Data :: Objects
+* **@foo.bar** - access the local scope ``d.foo.bar``
+* **@this.nodeKey** - access the local DOM node ``this.nodeKey``
+* **@i** - The current function index
+* **:foo.bar** - access the global scope ``window.foo.bar``
+* **\:foo.bar** - escape string ``:window.foo.bar``
 
-``data`` iterates over objects by applying ``d3.entries`` to the value
+## Concatentation
 
-    body:
-    - append: $div.row
-    - call:
-      - append: $ul
-      - selectAll: li
-      - data: 
-          section-1: section1.html
-          section-2: section2.html
-          section-3: section3.html
-      #d3 update pattern
-      - call:
-        - enter:
-        - append: $li
-        - append: a
-        - each:
-          - text: '@key'
-          - attr:
-              href: '@value'
-          - style:
-              font-color: '@value.color'
-
-# Requests
-
-    body: 
-    - append: $div.row
-    - call:
-      - append: $ul
-      - selectAll: li
-      - requests:
-          # { bar: [ baz, boom, bang] }
-          file.json: http://url.com/foo.json
-          # name.type: url
-        
-        # { finish the template after the request }
-        call:
-        - data: '@bar'
-        - call:
-          - enter:
-          - append: li
-          - text: '@'
+Concatenate string for ``text`` and ``html`` by supplying an array as the value.  Each element will be parsed with the value
+shortcuts then concatenated.
