@@ -41,8 +41,16 @@ d3.selection.prototype.template = (template, callback,i) ->
         s = ChangeStateDOM s, t
       else if t.k in ['text','html']
         ChangeInner s,t
-      else if t.k in ['enter','exit','remove']
+      else if t.k in ['enter','exit','remove','transition']
         s = s[t.k]()
+      else if t.k in ['on']
+        d3.entries t.v
+          .forEach (d) ->
+            s = s[t.k] d.key, ()->
+              d3.select @
+                .template d.value
+        
+        
     s   
   addBaseurl = (t) ->
     unless t.v['baseurl']
@@ -60,11 +68,12 @@ d3.selection.prototype.template = (template, callback,i) ->
       body: (s,t) ->
         #{ alternate name for call}
         d3.select document
-          .select 'body'
+          .select 'body' 
           .template t.v
       parent: (s,t) ->
         d3.select s.node().parentElement
           .template t.v
+        s #{return original selection}
       requests: (s,t) ->
         unless d3['requests']
           d3['requests'] = {}
