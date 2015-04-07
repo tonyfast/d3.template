@@ -22,6 +22,7 @@
   - append: $div#editor-block
   - child: 
     - append: $a.hider
+    - append: $span.octicon.octicon-x
   - child: 
     - append: $div#editor-text
 - child:
