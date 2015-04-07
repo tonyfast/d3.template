@@ -25,7 +25,7 @@
 - child:
   - append: $div#preview-block
 - stylesheets:
-    main: app.css
+    main: css/app.css
 - stylesheets:
     baseurl: http://cdn.rawgit.com/
     primer: primer/primer/master/css/primer.css
@@ -45,7 +45,7 @@
     cm-commentfold: codemirror/5.0.0/addon/fold/comment-fold.js
     call:
     - scripts: 
-        main: app.js
+        main: js/app.js
         call:
         - js: update();
 
