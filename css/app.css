@@ -1,26 +1,49 @@
-body {
-  font-size: 12px;
-}
-
-#toolbar{
+.btn-group#controller{
+  margin: 20px;
   position: fixed;
   right: 0;
-  top: 0;
+  bottom: 0;
+  opacity: .6;
+  z-index: 1000;
 }
-
-#toggle {
-  margin-top: 1.25em;
-}
-
-#template {
+#menu-modal{}
+#assets-modal{}
+#newtemp-modal{}
+#editor-modal{}
+#modal{
+  display: none;
   position: fixed;
+  left: 0;
   right: 0;
-  width: 400px;
-  top: 68px;
+  background-color: white;
+  padding: 0;
+  max-height: 70%;
+  width: 55%;
+  margin: auto;
+  overflow-y: auto;
+  z-index: 1000;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  background-clip: padding-box;
+  opacity: .9;
+}
+.modal .modal-body {
+  display: 'block';
+  border: 24px;
+}
+#editor-block{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 40px;
+  bottom: 20px;
+  margin: auto;
+  width: 60%;
+  padding: 0;
+  border-radius: 2px;
+  background-clip: padding-box;
+  opacity: .25;
   height: 100%;
-  opacity: 0.7;
-}
-
-.CodeMirror {
-  height: auto;
+  z-index: 600;
 }

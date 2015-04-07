@@ -1,0 +1,23 @@
+display:
+- child:  
+  - append: $div.container
+  - append: h1
+  - text: d3.template playground
+- child:  
+  - append: $div.container
+  - append: $div.blankslate
+  - child:
+    - append: h2
+    - html: '<code>d3.template</code> is an extension of the powerful <a href="d3js.org">d3js</a> library.'     
+  - child: 
+    - template: :d3.templates.text
+  - child:
+    - append: $div.container
+    - child:
+      - append: $h3
+      - html: "<a href='http://primercss.io/'>Github Primer</a> stylesheets are already available to simplify styling."
+
+text:
+- append: $div.container
+- append: $p.lead
+- text: Start typing in the editor to modify this webpage in real-time using d3-like syntaxes.

@@ -1,227 +1,265 @@
 ---
 ---
+d3.getScript = ( src, callback ) ->
+  #{http://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript}
+  script = document.createElement 'script'
+  #{script.async = 1}
+  prior = document.getElementsByTagName('script')[0]
+  prior.parentNode.insertBefore script, prior
+  script.onload = script.onreadystatechange = ( _, isAbort ) ->
+    if isAbort or not script.readyState or /loaded|complete/.test script.readyState
+      script.onload = script.onreadystatechange = null
+      script = undefined
 
-d3.selection.prototype.template = (template, callback) ->
-  ###
-  d3.[selection].template extends a d3 selection by 
-  iterating over an object that contains repeatable d3 
-  code patterns.
-
-  template adds data to the DOM and modifies selections.  It
-  allows data to be attached to its presentation layers within the
-  DOM.
-
-  also, template handles requests inline.  when a request is complete.
-  the last call state with continue to build teh template
-
-  d3.selection.template modifies d3.selection.prototype.template and d3.requests
-  ###
-      
-  build = ( s, t, state) ->
-    if not state
-      state = {}    
-    t.forEach (t) ->
-      t = d3.entries(t)[0]
-      args = t.key.split('.')
-      if args.length > 1 and d3['scales'] and d3['scales'][ args.slice(-1)[0] ]
-        state.callback = d3['scales'][ args.slice(-1)[0] ]
-        t.key = args.slice(0,-1).join('')
-      else
-        state.callback = (d) -> d
-      if rules[t.key]
-        s = rules[t.key]( s, t.value, state )
-      else if t.key in ['selectAll','select']
-          s = s[t.key] t.value
-      else
-        s = s[t.key] (d) ->
-          reduce t.value, d, state, s
-    s      
+      unless isAbort
+        if callback 
+          callback()
+  script.src = src  
   
-  rules = 
-    scales: (s,t,state) ->
-      d = s.data()
-      d3.entries t
-        .forEach (t) ->
-          if not d3['scales']
-            d3['scales'] = {}
-          else if typeof t.value == 'object'
-            if not d3['scales'][t.key]
-              d3['scales'][t.key] = d3.scale.linear()
-            d3.entries t.value
-              .forEach (_t) ->
-                if Array.isArray( _t.value )
-                  temp = []
-                  _t.value.forEach (_t) ->
-                    temp.push reduce( _t, d, state, s)
-                  t.value = temp
-                else 
-                  t.value = d3.extent d, (_d,i) ->
-                    state.i = i
-                    v = reduce( _t.value, _d, state, s)
-                    if v and v['trim']
-                      v = parseFloat v.trim()
-                    v
-                d3['scales'][t.key][_t.key] reduce( t.value, d, state, s)
-          else
-            d3['scales'][t.key] = reduce  t.value, d, state, s
-      s   
-    text: (s,t,state) ->
-      s.text (d,i) ->
-        if Array.isArray(t)
-          t.map (_d,i) ->
-            reduce _d, d, state, s
-          .join ''
-        else
-          reduce t, d, state, s
-    js: (s,t) ->
-      eval t
-      s
-    template: (s,t, state) ->
-      build s, reduce( t, null, state, s )
-    data: (s,t, state) ->
-      #{ force data to be an array or convenience? }
-      s.data (d) ->
-        t = reduce t, d, state
-        unless Array.isArray(t)
-          t = d3.entries t
-        t
-    datum: (s,t, state) ->
-      #{ force data to be an array or convenience? }
-      s.datum (d) -> reduce t, d, state
-    attr: (s,t, state) ->
-      d3.entries t
-        .forEach (t) ->
-          unless t.value
-            t.value = true
-          s.attr t.key, (d) ->
-            reduce t.value, d, state, s
-      s
-    style: (s,t, state) ->
-      d3.entries t
-        .forEach (t) ->
-          unless t.value
-            t.value = true
-          s.style t.key, (d) ->
-            reduce t.value, d, state, s
-      s
-    'class': (s,t, state) ->
-      d3.entries t
-        .forEach (t) ->
-          unless t.value
-            t.value = true
-          s.classed t.key, (d) ->
-            reduce t.value, d, state, s
-      s
-    enter: (s,t) ->
-      s.enter()
-    exit: (s,t) ->
-      s.exit()
-    remove: (s,t) ->
-      s.remove()
-    call: ( s, t, state) ->
-      s.call (s) ->
-        build s, t, state
-    each: ( s, t, state) ->
-      s.each (d, i) ->
-        state['i'] = i
-        build d3.select(@), t, state
-    append: (s,t) ->
-        id = null
-        tag = null
-        classes = null
-        if t.startsWith('$')
-          t = t.slice 1
-            .split '#'
-          if t[1]
-            id = t[1]
-          t = t[0].split '.'
-          if t[0]
-            tag = t[0]
-          classes = t.slice 1
-          if tag
-            s = s.append tag
-          if classes
-            classes.forEach (c) ->
-              s.classed c, true
-          if id
-            s.attr 'id', id
-        else
-          s = s.append t
-        s
-    child: (s,t, state) -> rules.call(s,t, state)
-    requests: (s,t, state)->
-      if t['call']
-        template = t['call']
-        delete t['call']
-      t = d3.entries t
-      unless d3['requests']
-        d3.requests = {}
-      l = t.length - 1
-      
-      
-      t.forEach (t,i)->
-          t.key = t.key.split('.')
-          type = 'text'
-          if t.key[1]
-            type = t.key[1]
-            t.key = t.key[0]
-            
-          unless d3['requests'][t.value]
-            get = (type, callback, complete)->
-              d3[type] t.value
-              .get (e,d) ->
-                 d3['requests'][t.value] = callback(d)
-                 d3['requests'][t.key] = d3['requests'][t.value] 
-                 console.log i,l,t.key,t.value
-                 if i == l and template
-                    s = s.call (s) ->
-                      build s, template
-              s
-            f = (d) -> d
-            if type in ['json','xml','csv','tsv','html','text']
-            else if type in ['yaml','yml']
-              type = 'text'
-              f = (d) -> 
-                jsyaml.load d 
-            s = get type, f
-          else 
-            d3['requests'][t.key] = d3['requests'][t.value] 
-            if i == l and template
-              s = s.call (s) ->
-                build s, template, state
-
-      s      
-  reduce = (path, d, state, s) ->
-    if typeof path == 'string' and path[0] in ['@',':']
-      if path in ['@']
-        d
-      else if path in ['@i']
-        d = state.i
-      else
-        if path[0] == ':'
-          d = window
-        else if path.slice(0,5) == '@this'
-          d = s.node()
-          path = ['@',path.slice(6)].join ''
-        d = path.slice 1
-            .split '.'
-            .reduce (p,k)->
-                p[k]
-            , d 
+d3.selection.prototype.template = (template, callback,i) ->
+  ### 
+  template an array of objects.
+  rules trigger d3 events and callback 
+  ###
+  rule = (s,t) ->
+    if config[t.k]
+      s = config[t.k] s, t  
     else
-      #{path has data}
-      d = path
-    if typeof d == 'function' and typeof d() == 'function'
-      d = d()
-    #{ apply scales}
-    state.callback d 
+      if t.k in ['selectAll','select','data','datum','template']
+        s = s[t.k] t.f t.v
+      else if t.k in ['call']
+        s = s.call (s) ->
+          s.template t.v
+      else if t.k in ['each']
+        s = s.each (d,i) ->
+          d3.select @
+            .template t.v,null,i
+      else if t.k in ['append','insert']
+        s = AppendDOM s, t
+      else if t.k in ['attr','class','style','property','classed']
+        #{ property access HTML5 properties }
+        s = ChangeStateDOM s, t
+      else if t.k in ['text','html']
+        ChangeInner s,t
+      else if t.k in ['enter','exit','remove']
+        s = s[t.k]()
+    s   
+  addBaseurl = (t) ->
+    unless t.v['baseurl']
+      t.v['baseurl'] = ''
+    d3.entries t.v
+      .filter (d) -> unless d.key in ['baseurl','call'] then true else false
+      .map (d) ->
+        d.value = t.v['baseurl'] + d.value
+        d
+  config = 
+      child: (s,t) ->
+        #{ alternate name for call}
+        t.k = 'call'
+        rule s, t
+      requests: (s,t) ->
+        unless d3['requests']
+          d3['requests'] = {}
+        s.call (s) ->
+          getRequest s, t, addBaseurl t
+      scripts: (s,t) ->
+        s.call (s) ->
+          getRequest s, t, 
+            addBaseurl t
+              .map (d)-> 
+                d.key += '.getScript'
+                d
+      stylesheets: (s,t) ->
+        h = d3.select 'head'
+        addBaseurl t 
+          .forEach (d) ->
+            unless h.select('#'+d.key).node() and h.select('#'+d.key).attr('id')
+              h.append 'link'
+                .attr 'id', d.key
+                .attr 'type', 'text/css'
+                .attr 'rel','stylesheet'
+                .attr 'href', d.value
+                .call (s) -> MarkupSelection s
+        
+        h.selectAll 'link.d3-template'
+          .each (d) ->
+            _s = d3.select @
+            if _s.attr('id') in d3.keys t.v
+              _s.attr 'disabled', null
+            else
+              _s.attr 'disabled', null
+        s
+      callbacks: (s,t) ->
+        unless d3['callbacks'] 
+          d3['callbacks'] = {}
+          
+        d3.entries t.v
+          .forEach (d)->
+            nm = d.key.split('.')[0]
+            f = d.key.split('.')[1]
+            d3['callbacks'][nm] = d3.scale[f]()
+            d3.entries d.value
+              .forEach (d) ->
+                if Array.isArray d.value
+                  d.value = d.value.map (d) -> 
+                    parseValue s, {value:d}
+                d3['callbacks'][nm][d.key] d.value
+        s
+                  
+          
+      js: (s,t) ->
+        #{ need this to trigger jquery libraries}
+        eval t.v
+        s
+  reduceKey = (k,v) ->
+    ###
+    k is array
+    dont let this break
+    ###
+    k.slice 1
+     .split '.'
+     .reduce (p,n) ->
+        if p[n]
+          p[n]
+        else 
+          p
+      , v
+      
+  ChangeInner = (s,t) ->
+    #{ Changes text and html }
+    #{ Concatenates individual array elements}
+    t.v = JoinArray s, t.v, ' '
+    s[t.k] t.f t.v
+
     
+  AppendDOM = (s, t) ->
+    if t.v[0] == '$'
+      id = t.v
+        .split '#'
+      tag = id[0]
+        .slice 1 #{remove dollar sign}
+        .split '.'
+      id = id[1]
+      classed = tag.slice(1)
+      tag = tag[0]
+    else 
+      tag = t.v
+    if tag.length > 0
+      s = s[t.k] tag
+    if classed
+      classed.forEach (d)->
+          s['classed'] d, true
+    if id
+      s['attr'] 'id', id
+    s
+
+  getRequest = (s,t,a) ->
+    iterate = (a) ->
+      if t.k in ['requests']
+        d3['requests'][nm] = d3['requests'][a[0].value]
+      if a.length == 1  
+        if t.v['call'] then s.template t.v['call'] else #{done}
+      else
+        getRequest s,t,a.slice(1)
+
+    type = 'json'
+    if a[0].key.split('.')[1]
+      type = a[0].key.split('.')[1]
+      
+    nm = a[0].key.split('.')[0]
+
+    if t.k in ['scripts'] 
+      d3[type] a[0].value, -> iterate a
+    else if t.k in ['requests'] and not d3['requests'][a[0].value]
+      d3[type] a[0].value, (d) ->
+          d3['requests'][a[0].value] = t.f d
+          iterate a            
+    else
+      iterate a
+
+        
+  ChangeStateDOM = (s,t) ->
+    f = (d) -> d
+    if t.k.startsWith 'class' 
+      t.k = 'classed'
+      f = (d) ->
+        if d == null 
+          true 
+        else 
+          d
+    d3.entries t.v
+      .forEach (d)->
+        d.value = parseValue s, { value: d.value }
+        s[t.k] d.key, t.f f d.value
+    s
+  builder = (s,t) ->
+    #{ each time a template is executed name the selection with the template }
+    MarkupSelection s
+    t.forEach (t) ->
+      #{ on the selection execute a element in the template}
+      s = Execute s, t 
+  MarkupSelection = (s) ->
+    #{ add feedback on d3 template histories }
+    s.classed 'd3-template', true
+  parseArgs = (s, t) ->
+    #{ parse template key and value}
+    t = 
+      k: d3.keys( t )[0].split('.')[0]
+      f: parseCallback s, t 
+      v: parseValue s, t 
+  
+  parseCallback = (s,t) ->
+    #{ get callback }
+    #{ list of callbacks in config with function }
+    t = d3.keys(t)[0].split('.')
+    if t[1]
+      d3['callbacks'][t[1]]
+    else 
+      (d) -> d
+      
+  parseValue = (s, t ) ->
+    #{ parse template value}
+    t = d3.values(t)[0]
+    if typeof t == 'string'
+      if t.slice(0,5) == '@this'
+        t = t[0] + t.slice(5)
+        t = reduceKey t, s.node()
+      if t.slice(0,2) == '@i'
+        t = i
+      else if t[0] == '@'
+        #{ local selection scope borrowed from CoffeeScript }
+        t = reduceKey t, s.datum()
+      else if t[0] == ':'
+        #{ global window context borrowed from Archie ML}
+        t = reduceKey t, window
+    else 
+      t
+    t
+    
+  JoinArray = (s,v,c) ->
+    if Array.isArray v
+      v = v.map (d) ->
+        parseValue s, {value:d}
+      .join c
+    else 
+      v
+      
+  Execute = (s,t) ->
+    ###
+    1. Convert Template to key, value, callback
+    2. Execute Rule
+    ###
+    t = parseArgs s, t
+    rule s, t
+  
+  
   unless callback
-    callback = (x)->x
+    callback = (d) -> d
+  
   d3.entries template
     .forEach (d) ->
-      unless d3['templates']
+      unless d3['templates'] 
         d3['templates'] = {}
       d3.templates[d.key] = d.value
-  build @, callback( template )
-  
+      
+  builder @, callback template

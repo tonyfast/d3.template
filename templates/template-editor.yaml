@@ -1,0 +1,51 @@
+- child:
+  - append: $script#initial
+  - requests:
+       init-template.text: init.yml
+       call:
+       - attr:  
+           type: text/yaml
+       - text: :d3.requests.init-template
+- child:
+  - append: $div.btn-group#controller
+  - append: $button.btn.modal-trigger#menu-trigger
+  - append: $span.mega-octicon.octicon-three-bars
+- child: 
+  - append: $div.modal.container.clearfix#modal
+  - append: $div.modal-body
+  - child: 
+    - append: h2
+    - text: d3.template playground
+- child:
+  - append: $div#editor-block
+  - child: 
+    - append: $a.hider
+  - child: 
+    - append: $div#editor-text
+- child:
+  - append: $div#preview-block
+- stylesheets:
+    main: app.css
+- stylesheets:
+    baseurl: http://cdn.rawgit.com/
+    primer: primer/primer/master/css/primer.css
+    octicons: github/octicons/master/octicons/octicons.css
+- stylesheets:
+    baseurl: //cdnjs.cloudflare.com/ajax/libs/    
+    cmcss: codemirror/5.0.0/codemirror.min.css
+    cm-theme: codemirror/5.0.0/theme/blackboard.css
+    cm-foldgutter: codemirror/5.0.0/addon/fold/foldgutter.css
+- scripts:
+    baseurl: //cdnjs.cloudflare.com/ajax/libs/
+    cmjs: codemirror/5.0.0/codemirror.js
+    cm-yaml: codemirror/5.0.0/mode/yaml/yaml.js
+    cm-foldcode: codemirror/5.0.0/addon/fold/foldcode.js
+    cm-foldgutter: codemirror/5.0.0/addon/fold/foldgutter.js
+    cm-indentfold: codemirror/5.0.0/addon/fold/indent-fold.js
+    cm-commentfold: codemirror/5.0.0/addon/fold/comment-fold.js
+    call:
+    - scripts: 
+        main: app.js
+        call:
+        - js: update();
+
