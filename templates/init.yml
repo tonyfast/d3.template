@@ -11,9 +11,7 @@ display:
     - "[click me](#)"
   - child:
     - select: a
-    - on: 
-        click: 
-        - js: "alert('Clicker')"
+    - on: { click: [{js: "alert('Clicker')"}]}
   
 - child:  
   - append: $div.container
