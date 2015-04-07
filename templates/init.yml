@@ -1,10 +1,20 @@
 display:
 - child:  
   - append: $div.container
-  - html.markdownify: |
+  - html.markdownify: 
+    - |
       # d3.template playground
       
       __Made__ with a *markdown* ``callback``
+      
+      ## Here is a link below
+    - "[click me](#)"
+  - child:
+    - select: a
+    - on: 
+        click: 
+        - js: "alert('Clicker')"
+  
 - child:  
   - append: $div.container
   - append: $div.blankslate
