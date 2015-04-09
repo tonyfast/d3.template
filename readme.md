@@ -38,7 +38,7 @@ Callbacks defintions start at the first period in a key.
 * **@this.nodeKey** - access the local DOM node ``this.nodeKey``
 * **@i** - The current function index
 * **:foo.bar** - access the global scope ``window.foo.bar``
-* **\\:foo.bar** - escape string ``:window.foo.bar``
+* **\\:window.foo.bar** - escape string ``:window.foo.bar``
 
 ## Concatentation
 
