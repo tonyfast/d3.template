@@ -16,7 +16,7 @@ Copy and paste these into the [wsywyg editor](http://tonyfast.com/d3.template/)
 
 ## Append shorthand:
 
-    - append: $div.foo.bar.baz
+    - append: $div.foo.bar#baz
 
 Starting values with a ``$`` will make
 
