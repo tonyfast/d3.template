@@ -2,15 +2,15 @@ display:
 - child:  
   - append: $div.container
   - html.markdownify: 
-    - |
-      # d3.template playground 
-      
-      __Made__ with a *markdown* ``callback``
-      
-      ## Here is a link below
-    - "[click me](#)"
+    - '#' 
+    - '[<span class="mega-octicon octicon-mark-github"></span>](https://github.com/tonyfast/d3.template/)'
+    - d3.template playground 
   - child:
-    - select: a
+    - append: $div.click-demo
+    - html.markdownify: 
+      - 'Add [click events](#) with structured data'
+  - child:
+    - select: .click-demo
     - on: { click: [{js: "alert('Clicker')"}]}
   
 - child:  
