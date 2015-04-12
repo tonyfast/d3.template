@@ -1,6 +1,6 @@
 ---
 ---
-d3.getScript = ( src, callback ) ->
+d3.getScript = (src, callback) ->
   #{http://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript}
   script = document.createElement 'script'
   #{script.async = 1}
@@ -17,7 +17,7 @@ d3.getScript = ( src, callback ) ->
   script.src = src
 
 d3.selection.prototype.template = (template, callback, i, data) ->
-  rule = (s,t) ->
+  rule = (s, t) ->
     ###
     template an array of objects.
     rules trigger d3 events and callback
@@ -60,48 +60,53 @@ d3.selection.prototype.template = (template, callback, i, data) ->
     unless t.v.baseurl
       t.v.baseurl = ''
     d3.entries t.v
-      .filter (d) -> d.key not in ['baseurl','call']
+      .filter (d) -> d.key not in ['baseurl', 'call']
       .map (d) ->
-        d.value = t.v.baseurl + d.value
+        d.value = "#{t.v.baseurl}#{d.value}"
         d
 
   config =
-    child: (s,t) ->
+    child: (s, t) ->
       #{ alternate name for call}
       t.k = 'call'
       rule s, t
-    body: (s,t) ->
+
+    body: (s, t) ->
       #{ alternate name for call}
-      d3.select document
-        .select 'body'
+      d3.select 'body'
         .template t.v
-    parent: (s,t) ->
+
+    parent: (s, t) ->
       d3.select s.node().parentElement
         .template t.v
       s #{return original selection}
-    requests: (s,t) ->
+
+    requests: (s, t) ->
       unless d3.requests
         d3.requests = {}
       s.call (s) ->
         getRequest s, t, addBaseurl t
-    scripts: (s,t) ->
+
+    scripts: (s, t) ->
       s.call (s) ->
         getRequest s, t,
           addBaseurl t
             .map (d)->
-              d.key += '.getScript'
+              d.key = "#{d.key}.getScript"
               d
-    stylesheets: (s,t) ->
+
+    stylesheets: (s, t) ->
       h = d3.select 'head'
       addBaseurl t
         .forEach (d) ->
-          unless h.select('#'+d.key).node() and h.select('#'+d.key).attr('id')
+          unless (_s = h.select("##{d.key}")).node() and _s.attr 'id'
             h.append 'link'
-              .attr 'id', d.key
-              .attr 'type', 'text/css'
-              .attr 'rel','stylesheet'
-              .attr 'href', d.value
-              .call (s) -> MarkupSelection s
+              .attr
+                id: d.key
+                type: 'text/css'
+                rel: 'stylesheet'
+                href: d.value
+              .call MarkupSelection
 
       h.selectAll 'link.d3-template'
         .each (d) ->
@@ -111,46 +116,43 @@ d3.selection.prototype.template = (template, callback, i, data) ->
           else
             _s.attr 'disabled', null
       s
-    callbacks: (s,t) ->
+
+    callbacks: (s, t) ->
       unless d3.callbacks
         d3.callbacks = {}
 
       d3.entries t.v
-        .forEach (d)->
-          nm = d.key.split('.')[0]
-          f = d.key.split('.')[1]
+        .forEach (d) ->
+          [nm, f] = d.key.split '.'
           d3.callbacks[nm] = d3.scale[f]()
           d3.entries d.value
             .forEach (d) ->
               if Array.isArray d.value
                 d.value = d.value.map (d) ->
-                  parseValue s, {value:d}
+                  parseValue s, value: d
               d3.callbacks[nm][d.key] d.value
       s
 
 
-    js: (s,t) ->
+    js: (s, t) ->
       #{ need this to trigger jquery libraries}
       eval t.v
       s
 
 
-  reduceKey = (k,v) ->
+  reduceKey = (k, v) ->
     ###
     k is array
     dont let this break
     ###
-    k.slice 1
+    k[1..]
      .split '.'
-     .reduce (p,n) ->
-        if p[n]
-          p[n]
-        else
-          p
+     .reduce (p, n) ->
+        if p[n] then p[n] else p
       , v
 
 
-  ChangeInner = (s,t) ->
+  ChangeInner = (s, t) ->
     #{ Changes text and html }
     #{ Concatenates individual array elements}
     t.v = JoinArray s, t.v, ' '
@@ -161,32 +163,30 @@ d3.selection.prototype.template = (template, callback, i, data) ->
     if t.v[0] == '$'
       id = t.v
         .split '#'
-      tag = id[0]
-        .slice 1 #{remove dollar sign}
-        .split '.'
+      tag = id[0][1..].split '.' #{remove dollar sign}
       id = id[1]
-      classed = tag.slice(1)
+      classed = tag[1..]
       tag = tag[0]
     else
       tag = t.v
-    if tag.length > 0
+    if tag.length
       s = s[t.k] tag
     if classed
       classed.forEach (d)->
-          s.classed d, true
+        s.classed d, true
     if id
       s.attr id: id
     s
 
 
-  getRequest = (s,t,a) ->
+  getRequest = (s, t, a) ->
     iterate = (a) ->
       if t.k in ['requests']
         d3.requests[nm] = d3.requests[a[0].value]
       if a.length == 1
         if t.v.call then s.template t.v.call else #{done}
       else
-        getRequest s,t,a.slice(1)
+        getRequest s, t, a[1..]
 
     type = 'json'
     if a[0].key.split('.')[1]
@@ -198,21 +198,17 @@ d3.selection.prototype.template = (template, callback, i, data) ->
       d3[type] a[0].value, -> iterate a
     else if t.k in ['requests'] and not d3.requests[a[0].value]
       d3[type] a[0].value, (d) ->
-          d3.requests[a[0].value] = t.f d
-          iterate a
+        d3.requests[a[0].value] = t.f d
+        iterate a
     else
       iterate a
 
 
-  ChangeStateDOM = (s,t) ->
+  ChangeStateDOM = (s, t) ->
     f = (d) -> d
     if t.k.startsWith 'class'
       t.k = 'classed'
-      f = (d) ->
-        if d == null
-          true
-        else
-          d
+      f = (d) -> if d == null then true else d
     d3.entries t.v
       .forEach (d)->
         d.value = parseValue s, { value: d.value }
@@ -220,7 +216,7 @@ d3.selection.prototype.template = (template, callback, i, data) ->
     s
 
 
-  builder = (s,t) ->
+  builder = (s, t) ->
     #{ each time a template is executed name the selection with the template }
     MarkupSelection s
     t.forEach (t) ->
@@ -241,7 +237,7 @@ d3.selection.prototype.template = (template, callback, i, data) ->
       v: parseValue s, t
 
 
-  parseCallback = (s,t) ->
+  parseCallback = (s, t) ->
     #{ get callback }
     #{ list of callbacks in config with function }
     t = d3.keys(t)[0].split('.')
@@ -255,10 +251,10 @@ d3.selection.prototype.template = (template, callback, i, data) ->
     #{ parse template value}
     t = d3.values(t)[0]
     if typeof t == 'string'
-      if t.slice(0,5) == '@this'
-        t = t[0] + t.slice(5)
+      if t[..5] == '@this'
+        t = t[0] + t[5..]
         t = reduceKey t, s.node()
-      else if t.slice(0,2) == '@i'
+      else if t[..2] == '@i'
         t = i
       else if t[0] == '@'
         unless data
@@ -267,13 +263,13 @@ d3.selection.prototype.template = (template, callback, i, data) ->
       else if t[0] == ':'
         t = reduceKey t, window
       else if t[0] == '\\'
-        t = t.slice(1)
+        t = t[1..]
     else
       t
     t
 
 
-  JoinArray = (s,v,c) ->
+  JoinArray = (s, v, c) ->
     if Array.isArray v
       v = v.map (d) ->
         parseValue s, {value:d}
@@ -282,7 +278,7 @@ d3.selection.prototype.template = (template, callback, i, data) ->
       v
 
 
-  Execute = (s,t) ->
+  Execute = (s, t) ->
     t = parseArgs s, t
     rule s, t
 
