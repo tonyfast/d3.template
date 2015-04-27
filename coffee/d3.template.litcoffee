@@ -165,11 +165,11 @@ I overzealously used child in past templates and I forcing this rule.
 
 ## d3.template syntaxes
 
-#\## dollar sign notation
+### dollar sign notation
 
 Create ``tag`` with ``class1`` and ``class2`` along with an id ``anchor``
 
-<code class="yaml">
+```yaml
 # Create a new tag
 - append: $tag.class1.class2#anchor
 
@@ -177,7 +177,7 @@ Create ``tag`` with ``class1`` and ``class2`` along with an id ``anchor``
 - append: tag
 - append: $.class1.class2
 - append: $#anchor
-</code>
+```
 
 
       createNode = (template, selection) ->
