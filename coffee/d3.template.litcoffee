@@ -143,16 +143,16 @@ To avoid this behavior use datum.
                 d3.select @
                   .template template.value[d], data, opts
             selection
-            
-I overzealously used child in past templates and I forcing this rule.          
-        
-        @opts.rule.child = @opts.rule.call
-        
 This isn't part of d3, but it's useful.            
             
           js: (template,selection)->
             eval template.value
             selection
+            
+I overzealously used child in past templates and I forcing this rule.          
+        
+        @opts.rule.child = @opts.rule.call
+        
         
       updateSelection =  (template, selection) ->
         ###

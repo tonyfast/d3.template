@@ -165,14 +165,13 @@
             });
           });
           return selection;
-        }
-      });
-      return this.opts.rule.child = this.opts.rule.call({
+        },
         js: function(template, selection) {
           eval(template.value);
           return selection;
         }
       });
+      return this.opts.rule.child = this.opts.rule.call;
     };
 
     updateSelection = function(template, selection) {
