@@ -7,27 +7,16 @@
       </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/js-yaml/3.2.7/js-yaml.min.js">
       </script>
-    <script src="js/d3.template.js"></script>
+    <script src="js/coffee-script.js">
+      </script>
+    <script src="js/d3.template.js">
+      </script>
+    <script src="js/d3.getScript.js">
+      </script>
+    
   </head>
   <body>  
-    <script>
-      ;( function(){
-        template = [];
-        d3['callbacks']= {
-          yaml : function(d){
-            return jsyaml.load(d);
-          },
-          markdownify: function(d){
-            return marked(d);
-          }
-        }
-        
-        d3.text( 'templates/template-editor.yaml', function(d){
-          template =  jsyaml.load( d );
-          d3.select('body')
-          .template( template )
-        });
-      })();
-    </script>
+    <script type="text/literate-coffeescript" src="start.litcoffee">
+      </script>
   </body>
 </html>

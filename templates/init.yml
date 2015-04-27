@@ -10,7 +10,7 @@ display:
     - html.markdownify: 
       - 'Add [click events](#) with structured data'
   - child:
-    - select: .click-demo
+    - select: .click-demo a
     - on: { click: [{js: "alert('Clicker')"}]}
   
 - child:  

@@ -123,13 +123,11 @@ preview.datum({
 })
 function update(){
   d3.select('#preview-block').call( function(s){
+    d3.templates = jsyaml.load( editor.getValue() );
     if( s.datum()['state'] == 'html' ){
       s.html('')
-       .template(  
-        jsyaml.load( editor.getValue() ), function(d){ return d.display } 
-      )
+       .template(  d3.templates.display, null, window['add-on'] )
     } else if ( s.datum()['state'] == 'raw' ){
-
       s.text( function(){
         return this.innerHTML
       })
