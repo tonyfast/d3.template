@@ -14,11 +14,6 @@ after_script:
 # View status in travis dashboard
 - git status
 - git push "https://${GH_TOKEN}@github.com/tonyfast/d3.template.git" master:master
-- git checkout gh-pages
-- git add .
-- git commit -m "Update Gh-pages compiled javascript source"
-- git push "https://${GH_TOKEN}@github.com/tonyfast/d3.template.git" gh-pages:gh:-pages
-
 
 env:
   global:
