@@ -6,5 +6,12 @@ before_install:
 - npm install coffee-script
 after_script:
 - git status
-dd:
-  secure: CiHPKJGq+ydsnXmwW+oO0tYpV5QU5dB1iRHX5jwFAfKAjcr1Bb24QsVkkkOgAS+D8x5a256AlpHtuCFRUzlBUvvABzPfAL15GXyXk/cCMfRa6+F89ElWr5sX5M5k/58iWHBXo3yTdvPhS4wwRCCWkSoeH0/cjOMGaOKpJ/7jcsQ=
+- git config user.name "tonyfast"
+- git config user.email "tony.fast@gmail.com"
+- git add js 
+- git commit -m "Build Coffeescript"
+- git push --force --quiet "https://${GH_TOKEN}@$github.com/tonyfast/d3.template.git" master:master 
+
+env:
+  global:
+    secure: CiHPKJGq+ydsnXmwW+oO0tYpV5QU5dB1iRHX5jwFAfKAjcr1Bb24QsVkkkOgAS+D8x5a256AlpHtuCFRUzlBUvvABzPfAL15GXyXk/cCMfRa6+F89ElWr5sX5M5k/58iWHBXo3yTdvPhS4wwRCCWkSoeH0/cjOMGaOKpJ/7jcsQ=
