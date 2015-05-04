@@ -10,7 +10,7 @@ after_script:
 - git config user.email "tony.fast@gmail.com"
 - git add js 
 - git commit -m "Build Coffeescript"
-- git push --force --quiet "https://${GH_TOKEN}@$github.com/tonyfast/d3.template.git" master:master 
+- git push --force --quiet "https://${GH_TOKEN}@github.com/tonyfast/d3.template.git" master:master 
 
 env:
   global:
