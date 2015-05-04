@@ -6,17 +6,28 @@
 
 Below is a ``yaml`` string that will create a very simple HTML element.
 
-```yaml
-- append: div
-- attr:
-    class: 'container'
-- call:
-  - append: h1
-  - text: Hello World
-- call: 
-  - append: p
-  - text: I am a child of the parent container
-```
+
+        ###
+        Coffeescript is does not write arrays of objects well.
+        ###
+        
+        template [
+          {append:'div'}
+          {
+            attr:
+              class: 'contiainer'
+          }
+          {
+            call:[
+            {append: 'h1'}
+            {text: 'Hello World'}
+            ]
+            call:[
+            {append: 'p'}
+            {text: 'I am a child of the parent container'}
+            ]
+          }
+        ]
 
 # How does it work
 
