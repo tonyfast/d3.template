@@ -5,3 +5,5 @@ before_script:
   coffee --compile -o js coffee
 before_install:
   - npm install coffee-script
+after_script:
+  - git status 
