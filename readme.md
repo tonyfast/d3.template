@@ -22,28 +22,28 @@ Below is a ``yaml`` string that will create a very simple HTML element.
 
 1. Create a template that can be converted to a Javascript object.  
 
-    ###
-    Deserialize a javascript object 
-    Requires jsyaml
-    ###
-    template_data = JSON.parse json_string
+        ###
+        Deserialize a javascript object 
+        Requires jsyaml
+        ###
+        template_data = JSON.parse json_string
     
 2. Pass the object to a ``d3.selection``
     
-    ###
-    Append <div class="d3-template"></div> to the <body></body> tag
-    ###
-    template_div = d3.select 'body'
-      .append 'div'
-      .attr 'class', 'd3-template'
+        ###
+        Append <div class="d3-template"></div> to the <body></body> tag
+        ###
+        template_div = d3.select 'body'
+          .append 'div'
+          .attr 'class', 'd3-template'
 
 3. ``d3.template`` iterates over the arrayed objects using d3-like syntaxes.
     
-    ###
-    The d3 selection ``div`` has class ``template`` that uses 
-    key value pairs to build html documents
-    ###
-    div = template_div.template template_data
+        ###
+        The d3 selection ``div`` has class ``template`` that uses 
+        key value pairs to build html documents
+        ###
+        div = template_div.template template_data
 
 # Keys
 
@@ -70,7 +70,9 @@ Values are the arguments that are passed to the rules.
 
 ### Concatenate Strings
 
+# About this readme
 
+This readme is written in literate coffeescript and is used for the tutorial on the webpage.
 
 
 
