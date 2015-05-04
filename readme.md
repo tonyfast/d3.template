@@ -1,3 +1,83 @@
+# ``d3.template`` 
+
+``d3.template`` is a reactive templating engine extended from ``d3js`` to create HTML from structured data.
+
+# Example
+
+Below is a ``yaml`` string that will create a very simple HTML element.
+
+```yaml
+- append: div
+- attr:
+    class: 'container'
+- call:
+  - append: h1
+  - text: Hello World
+- call: 
+  - append: p
+  - text: I am a child of the parent container
+```
+
+# How does it work
+
+1. Create a template that can be converted to a Javascript object.  
+
+    ###
+    Deserialize a javascript object 
+    Requires jsyaml
+    ###
+    template_data = JSON.parse json_string
+    
+2. Pass the object to a ``d3.selection``
+    
+    ###
+    Append <div class="d3-template"></div> to the <body></body> tag
+    ###
+    template_div = d3.select 'body'
+      .append 'div'
+      .attr 'class', 'd3-template'
+
+3. ``d3.template`` iterates over the arrayed objects using d3-like syntaxes.
+    
+    ###
+    The d3 selection ``div`` has class ``template`` that uses 
+    key value pairs to build html documents
+    ###
+    div = template_div.template template_data
+
+# Keys
+
+Most of the options from core [d3 Selection API](https://github.com/mbostock/d3/wiki/Selections) are 
+available with ``d3.template``.  The d3 
+
+## Rule
+
+Each method in the d3.selection API has a special set of rules written in [coffeescript](). 
+
+> I am not married to the word rule.  Method is probably a better word.
+
+### Rule.Callbacks
+
+Rules can be append with a callback that applies a function to the value of the template.
+
+# Values
+
+Values are the arguments that are passed to the rules.
+
+## Strings
+
+## Arrays
+
+### Concatenate Strings
+
+
+
+
+
+
+
+
+
 [![Build Status](https://travis-ci.org/tonyfast/d3.template.svg?branch=master)](https://travis-ci.org/tonyfast/d3.template)
 
 It is very easy to extend ``d3js`` beyond SVG elements to a DOM manipulation tool.  At it's core, d3 adds ``__data__`` to selected DOM
