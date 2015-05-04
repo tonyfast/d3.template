@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/tonyfast/d3.template.svg?branch=master)](https://travis-ci.org/tonyfast/d3.template)
+
 It is very easy to extend ``d3js`` beyond SVG elements to a DOM manipulation tool.  At it's core, d3 adds ``__data__`` to selected DOM
 elements then it adds convenience functions to insert derivatives of this data into the DOM.
 
