@@ -1,7 +1,7 @@
 # ``d3.template`` in action
 
 The ``gh-pages`` branch will demo ``d3.template``.  This ``readme.md`` is written 
-in literate coffeescript and will be used to initialize the demo.
+in literate coffeescript and will be used to initialize the demo; all code blocks are executable by Coffeescript..
 
 # Overview
 
@@ -18,7 +18,7 @@ array of objects containing ``d3.template`` syntaxes.
       
 ## Making a Rule
 
-``d3.template`` rules take in four arguments 
+``d3.template`` [rules](https://github.com/tonyfast/d3.template/blob/master/coffee/d3.template.litcoffee#initialize-the-rules-for-the-d3-core-api-selections) take in four arguments 
 
 1. A parsed template object
 2. A current d3 selection
@@ -84,7 +84,7 @@ All the requests are stored in ``d3.requests`` with their respective keys.
       window['add-on'] = 
         rule: 
         
-### rule 1: load stylesheets
+### rule 1: load stylesheets ###
 
           stylesheets: (t,s,d,o)->
             baseurl = t.value.baseurl ? ''
@@ -99,9 +99,14 @@ All the requests are stored in ``d3.requests`` with their respective keys.
                   .attr 'type','text/css'
             s
 
-### rule 2: make requests
+### rule 2: make requests ###
 
           requests: makeRequest
+  
+### rule 3: get scripts ###
+
+And do not break anything.
+
           scripts: (t,s,d,o)->
             temp = {}
             d3.entries t.value
@@ -113,13 +118,28 @@ All the requests are stored in ``d3.requests`` with their respective keys.
             t.value = temp
             makeRequest t,s,d,o
             
-### rule 3: get scripts 
+## Callbacks
 
-And do not break anything.
+Callbacks operate on the value of the ``d3.template`` key.
             
         callback: 
+    
+Convert text to markdown after concatenation of arrayed values    
+    
           markdownify: (d)->marked(d)
+    
+Convert a block string into yaml    
+    
           yaml: (d)->jsyaml.load(d)
+    
+Execute a blockstring of coffeescript
+    
+          coffeescript: (d)->CoffeeScript.run(d)
+    
+# Run it
+
+Load a template and append it ``body``.
+
           
       d3.text 'templates/template-editor.yaml', (d)->
         template = jsyaml.load d
