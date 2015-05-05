@@ -1,5 +1,41 @@
 {
+  "name": "d3.template",
+  "version": "0.1.0",
+  "description": "A data-driven templating engine for d3js",
+  "keywords": [
+    "d3",
+    "template"
+  ],
+  "homepage": "http://tonyfast.com/d3.template",
+  "author": {
+    "name": "Tony Fast",
+    "url": "http://tonyfast.com"
+  },
+  "contributors": [
+    {
+      "name": "Nicholas Bollweg",
+      "url": "http://github.com/bollwyvl"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tonyfast/d3.template.git"
+  },
+  "peerDependencies": {
+    "d3": "^3.5.5"
+  },
   "devDependencies": {
-    "coffee-script": "latest"
+    "coffee-script": "latest",
+    "coffeedoc": "~0.3.1"
+  },
+  "licenses": [
+    {
+      "type": "BSD",
+      "url": "https://github.com/tonyfast/d3.template/blob/master/LICENSE"
+    }
+  ],
+  "scripts": {
+    "build": "./node_modules/.bin/coffee -cm -o js coffee/",
+    "watch": "./node_modules/.bin/coffee -cwm -o js coffee/"
   }
 }
