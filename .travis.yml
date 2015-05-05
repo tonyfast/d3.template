@@ -5,13 +5,10 @@ node_js:
 branches:
   only:
   - master
-  
-before_script: 
-- coffee --compile -o js coffee
-- coffee --compile -o addon addon/coffee
 
-before_install:
-- npm install coffee-script
+before_script:
+- npm run build
+
 after_script:
 - git status
 - git config user.name "tonyfast"
