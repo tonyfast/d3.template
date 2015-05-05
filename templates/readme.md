@@ -1,0 +1,1 @@
+``d3.template`` yaml manifests containing ``templates``
