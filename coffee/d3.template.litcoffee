@@ -14,19 +14,19 @@ For each element in the d3 selection
     
     
     
-      @.each (d,i) ->
-        opts ?= new Object
-        data ?= new Object
+        @.each (d,i) ->
+          opts ?= new Object
+          data ?= new Object
         
         
 The current state of the dom-node        
-        
-        data.state ?= d
-        data.index ?= i
+
+          data.state ?= d
+          data.index ?= i
 
 Define a class to manage the templates, selections, data, and options
 
-        new templater template, d3.select(@), data, opts
+          new templater template, d3.select(@), data, opts
     
 ``template`` creates a reactive state for d3 elements and data.
       
