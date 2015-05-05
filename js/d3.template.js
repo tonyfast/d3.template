@@ -291,15 +291,25 @@
       t = d3.values(template)[0];
       if (typeof t === 'string') {
         if (t.slice(0, 6) === '@this') {
+
+          /* d3.select(this).property( args ) */
           t = t[0] + t.slice(5);
           t = reduceKey(t, this.selection.node());
         } else if (t.slice(0, 3) === '@i') {
+
+          /* index of the selection */
           t = this.data.index;
         } else if (t[0] === '@') {
+
+          /* the data in the current selection */
           t = reduceKey(t, this.data.state);
         } else if (t[0] === ':') {
+
+          /* :arg1.arg2 -- windows[arg1][arg2] */
           t = reduceKey(t, window);
         } else if (t[0] === '\\') {
+
+          /* escape character */
           t = t.slice(1);
         }
       } else {
