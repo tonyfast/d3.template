@@ -1,4 +1,7 @@
-Create reusable designed patterns from structured data to created structured HTML, Style, and interaction
+# d3.template
+
+Create reusable designed patterns from structured data to created structured HTML, Style, and interaction. 
+``d3.template`` is a [``d3.selection`` prototype](https://github.com/mbostock/d3/wiki/Selections#extension).
 
     d3.selection.prototype.template = ( template, data, opts ) ->
       ###
@@ -7,26 +10,22 @@ Create reusable designed patterns from structured data to created structured HTM
       opts - optional rules and callbacks
       ###
 
-For each element in the d3 selection
 
-* Inherit inherit the bound data and selection index
-* Create a new d3.template class for the current selection, data, and opts.
+Each element in the selection can data bound to it.  Each element in the
+new d3.template class has access to current selection, data, and user-defined configurations.
     
-    
-    
-        @.each (d,i) ->
-          opts ?= new Object
-          data ?= new Object
-        
+      @.each (d,i) ->
+        opts ?= new Object
+        data ?= new Object
         
 The current state of the dom-node        
-
-          data.state ?= d
-          data.index ?= i
+        
+        data.state ?= d
+        data.index ?= i
 
 Define a class to manage the templates, selections, data, and options
 
-          new templater template, d3.select(@), data, opts
+        new templater template, d3.select(@), data, opts
     
 ``template`` creates a reactive state for d3 elements and data.
       
@@ -67,6 +66,10 @@ a ``key``, ``value``, and ``callback``
         d3.entries opts
           .forEach (opts) ->
             @update @opts[opts.key]?= new Object, opts.value
+
+Build will concatenate values into strings when ``text`` and ``html`` are
+passed an array.
+
 
       build: ()->
         ###
