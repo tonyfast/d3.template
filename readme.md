@@ -1,46 +1,127 @@
-It is very easy to extend ``d3js`` beyond SVG elements to a DOM manipulation tool.  At it's core, d3 adds ``__data__`` to selected DOM
-elements then it adds convenience functions to insert derivatives of this data into the DOM.
+# ``d3.template`` in action
 
-``d3js`` has a limited grammer and very repeatable syntaxes.  ``d3.template`` extends ``d3js`` to execute reusable patterns from structured data, typically YAML because it is easy to write.
+The ``gh-pages`` branch will demo ``d3.template``.  This ``readme.md`` is written 
+in literate coffeescript and will be used to initialize the demo.
 
-[``d3.template``](https://github.com/tonyfast/d3.template/) traverses a large nested array of objects.  keys are equivalent to d3 commands with add-ons to get scripts, providers, stylesheets, and execute javascript.  The value is an value into the d3 method.
+# Overview
 
-## Example Templates
+This example will use create new rules and callbacks for ``d3.template`` then 
+the template is built using simple d3js commands.
 
-Copy and paste these into the [wsywyg editor](http://tonyfast.com/d3.template/)
+## Initialize some global variables
 
-* [https://gist.github.com/tonyfast/13e1e75081f73a118a9f](https://gist.github.com/tonyfast/13e1e75081f73a118a9f)
-* [https://gist.githubusercontent.com/tonyfast/49e2e2cbab5cf92fbe9f/raw/07b3996b14aa7f58300b7e12b2549fdca8978d64/.movie-domain.yml](Movie Data)
-* [Templates used for demo page](https://github.com/tonyfast/d3.template/tree/gh-pages/templates)
+``d3.requests`` will store requests made using d3 xhr methods.  ``template`` is an
+array of objects containing ``d3.template`` syntaxes.
 
+      d3.requests = new Object
+      template = new Array
+      
+## Making a Rule
 
-## Append shorthand:
+``d3.template`` rules take in four arguments 
 
-    - append: $div.foo.bar#baz
+1. A parsed template object
+2. A current d3 selection
+3. The nearest parents data selection
+4. Any custom rules or callbacks.
+      
+## Chain requests
 
-Starting values with a ``$`` will make
+> This could be done with [requirejs]() instead.
+      
+      makeRequest = (template,selection,data,opts)->
+        ###
+        baseurl is a special key that is prepended to all of the values
+        the call key is executed after all of the requests successfully or with an error.
+        template[key,value,callback]
+        selection - d3 selection
+        ###
+        baseurl = (template) ->
+          ### append baseurl to the requests source and remove the complete callback ###
+          baseurl = template.baseurl ? ''
+          temp = new Object
+          d3.entries template
+            .forEach (d)-> 
+              unless d.key in ['baseurl','call']
+                temp[d.key] = "#{baseurl}#{d.value}"
+          temp
+          
+For each of the objects make a xhr request and default to json.  
 
+This function will use the argument at the end of the key to identify the request method.
 
-    <div class="foo bar" id="baz">
-    </div>
-    
-## Callbacks 
+``foo.xml: http://api.xml`` is equivalent to d3.xml('http://api.xml', function )
+``foo.text: http://api.whatever.com`` is equivalent to d3.text('http://api.whatever.com', function )
+          
+        iterate = (template,callback,complete)->
+          current = d3.entries( template )
+          key = current[0].key.split '.'
+          method = 'json'
+          if key.length > 1 then method = key[1]
+          key = key[0]
+          
+          ### Make the Request ###
+          d3[method] current[0].value, (d) ->
+            
+All the requests are stored in ``d3.requests`` with their respective keys.
+            
+            d3.requests[key] = d
+            if current.length == 1 and complete
+              selection.template complete, data, opts        
+            else 
+              delete template[current[0].key]
+              iterate template, callback, complete
+              
+        iterate baseurl(template.value), template.callback, template.value.call
+        selection
+      
+## Make Some New Rules
 
-``key.baz.foo`` will applied the function ``d3.callbacks.baz.foo`` before the data
-is applied to the dom.  
+``d3.template`` has rules for every method in the core d3js API.  Any of these
+  rules are overridden by custom rules.
 
-Callbacks defintions start at the first period in a key.
+      
+      window['add-on'] = 
+        rule: 
+        
+### rule 1: load stylesheets
 
+          stylesheets: (t,s,d,o)->
+            baseurl = t.value.baseurl ? ''
+            head = d3.select 'head'
+            d3.entries t.value
+              .filter (d)-> d.key not in ['baseurl','call']
+              .forEach (d)->
+                head.append 'link'
+                  .attr 'id',d.key
+                  .attr 'href', "#{baseurl}#{d.value}"
+                  .attr 'rel','stylesheet'
+                  .attr 'type','text/css'
+            s
 
-## Value shortcuts:
+### rule 2: make requests
 
-* **@foo.bar** - access the local scope ``d.foo.bar``
-* **@this.nodeKey** - access the local DOM node ``this.nodeKey``
-* **@i** - The current function index
-* **:foo.bar** - access the global scope ``window.foo.bar``
-* **\\:window.foo.bar** - escape string ``:window.foo.bar``
+          requests: makeRequest
+          scripts: (t,s,d,o)->
+            temp = {}
+            d3.entries t.value
+              .forEach (_t) ->
+                unless _t.key in ['baseurl','call']
+                  temp["#{_t.key}.getScript"] = _t.value
+                else
+                  temp["#{_t.key}"] = _t.value
+            t.value = temp
+            makeRequest t,s,d,o
+            
+### rule 3: get scripts 
 
-## Concatentation
-
-Concatenate string for ``text`` and ``html`` by supplying an array as the value.  Each element will be parsed with the value
-shortcuts then concatenated.
+And do not break anything.
+            
+        callback: 
+          markdownify: (d)->marked(d)
+          yaml: (d)->jsyaml.load(d)
+          
+      d3.text 'templates/template-editor.yaml', (d)->
+        template = jsyaml.load d
+        d3.select 'body'
+          .template template, null, window['add-on']
