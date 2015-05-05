@@ -13,9 +13,11 @@ For each element in the d3 selection
 * Create a new d3.template class for the current selection, data, and opts.
     
     
+    
       @.each (d,i) ->
         opts ?= new Object
         data ?= new Object
+        
         
 The current state of the dom-node        
         
@@ -281,6 +283,10 @@ Create ``tag`` with ``class1`` and ``class2`` along with an id ``anchor``
 # Parser
 
 Parse keys, callbacks, and values.
+
+```
+- key.callback: value
+```
         
       parseArgs: (template) ->
         ### 
@@ -291,6 +297,16 @@ Parse keys, callbacks, and values.
           key: d3.keys( template )[0].split('.')[0]
           callback: @parseCallback template
           value: @parseValue template
+          
+## Callbacks
+
+Callbacks transform the value of a template.  Callbacks are defined on the keys, for example:
+
+```
+- foo.bar: value
+```
+
+Would apply the rule ``foo``, extract the value, then apply ``bar(value)`` before executing the template.
 
       parseCallback: (template) ->
         ###
@@ -300,27 +316,60 @@ Parse keys, callbacks, and values.
         t = d3.keys(template)[0].split('.')
         if t[1] then @opts.callback[t[1]] else (d) -> d
 
+## Value Syntaxes
+
+The template values can access data and DOM information from the both the
+current node and the global javascript scope.  All of the keys for an object
+are separated by ``.``
+
+```
+:foo-bar.baz.4 ---> window['foo-bar']['baz'][4]
+```
+
       parseValue: (template) ->
         ###
         parse template value
         ###
         t = d3.values(template)[0]
         if typeof t == 'string'
+
+#### Local DOM properties
+
+``@this`` is the current node selected by d3.
+
           if t[..5] == '@this'
             ### d3.select(this).property( args ) ###
             t = t[0] + t[5..]
-            t = reduceKey t, @selection.node()
+            t = reduceKey t, @selection.node()            
+            
+#### Current iteration in a selection
+
+``@i`` is the index of an ``each`` execution.  
+            
           else if t[..2] == '@i'
             ### index of the selection ###
             t = @data.index
+            
+#### Data of the current selection
+
+``@`` accesses ``__data__`` attached to a node.
+            
           else if t[0] == '@'
             ### the data in the current selection ###
             t = reduceKey t, @data.state
+            
+#### Global Scope
+
+``:`` access the keys in ``window``.
+            
           else if t[0] == ':'
             ### :arg1.arg2 -- windows[arg1][arg2] ###
             t = reduceKey t, window
+            
+#### Escape the string            
+            
           else if t[0] == '\\'
-            ### escape character ####
+            ### escape character ###
             t = t[1..]
         else
           t
