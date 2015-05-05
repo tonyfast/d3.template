@@ -35,7 +35,10 @@
     }
   ],
   "scripts": {
-    "build": "./node_modules/.bin/coffee -cm -o js coffee/",
-    "watch": "./node_modules/.bin/coffee -cwm -o js coffee/"
+    "build": "npm run build-core && npm run build-addon",
+    "build-core": "./node_modules/.bin/coffee -cm -o js coffee/",
+    "build-addon": "./node_modules/.bin/coffee -cm -o addon addon/coffee/",
+    "watch": "./node_modules/.bin/coffee -cwm -o js coffee/",
+    "watch-addon": "./node_modules/.bin/coffee -cwm -o addon/ addon/coffee/"
   }
 }
