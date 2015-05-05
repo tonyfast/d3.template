@@ -1,22 +1,31 @@
 # ``d3.template`` 
 
-``d3.template`` is a reactive templating engine extended from ``d3js`` to create HTML from structured data.
+``d3.template`` is a reactive templating engine for ``d3js`` to create HTML from structured data.
 
-# Example
+# Quick Start
 
-Below is a ``yaml`` string that will create a very simple HTML element.
+[View this readme file in the ``d3.template`` playground.]()
 
+> This readme file is written in literate coffeescript.
+
+# Examples
+
+Let's make a ``<div></div>`` with a heading and subtext.
+
+1. Define a javascript object using ``d3.template`` key value pairs.
 
         ###
-        Coffeescript is does not write arrays of objects well.
+        An array of objects in coffeescript
         ###
         
-        template [
+        template_data = [
+          ### <div class="container"></div> ###
           {append:'div'}
           {
             attr:
-              class: 'contiainer'
+              class: 'container'
           }
+          ### child nodes of the parent <div> ###
           {
             call:[
             {append: 'h1'}
@@ -28,21 +37,12 @@ Below is a ``yaml`` string that will create a very simple HTML element.
             ]
           }
         ]
-
-# How does it work
-
-1. Create a template that can be converted to a Javascript object.  
-
-        ###
-        Deserialize a javascript object 
-        Requires jsyaml
-        ###
-        template_data = JSON.parse json_string
     
 2. Pass the object to a ``d3.selection``
     
         ###
         Append <div class="d3-template"></div> to the <body></body> tag
+        with d3js commands.
         ###
         template_div = d3.select 'body'
           .append 'div'
@@ -55,6 +55,15 @@ Below is a ``yaml`` string that will create a very simple HTML element.
         key value pairs to build html documents
         ###
         div = template_div.template template_data
+        
+## Result
+
+```html
+<div class="container">
+  <h1>Hello World</h1>
+  <p>I am a child of the parent container</p>
+</div>
+```
 
 # Keys
 

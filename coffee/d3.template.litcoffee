@@ -95,12 +95,29 @@ a ``key``, ``value``, and ``callback``
           value: null
           callback: (d) -> d
           
+## Initialize the rules for the d3 Core Api Selections.
+
 Create a rules for all of the [d3 selection API](https://github.com/mbostock/d3/wiki/Selections).
           
         @update @opts['rule'] ?= new Object,
+
+#### d3.selection
+
+Generate d3 selections
+
           selectAll: updateSelection
           select: updateSelection
+          
+##### d3.template
+
+``d3.template`` is a d3.selection prototype
+
           template: updateSelection
+          
+##### Data Operations
+
+Append data to nodes in the current selection
+
           datum: updateSelection
 
 Add a convenience function to turn objects into arrays
@@ -114,28 +131,60 @@ To avoid this behavior use datum.
 
 ``call`` and ``each`` recurse into d3.template after some housekeeping
 
+#### Selection Merges          
+
+d3js data and selection operations.
+
+          enter: nullSelection
+          exit: nullSelection  
+          remove: nullSelection
+
+#### Hierarchy
+
+Use call the modify the children of a selection.
+
           call: (template,selection,data,opts)->
             selection['call'] (selection)=>
               selection['template'] template.value, data, opts
+              
+Iterate over through the current selection         
+              
           each: (template,selection,data,opts)->
+            ###
+            Pass the template, data, and current configurations
+            to each iteration
+            ###
             selection.each (d,i) ->
               [data.state, data.index] = [ d, i]
               d3.select @
                 .template template.value, data, opts
                 
+#### Create DOM nodes                
+                
+Insert doesn't really do anything diferent than append and the momnt                
+                
           insert: createNode
           append: createNode
-          enter: nullSelection
-          exit: nullSelection  
-          remove: nullSelection
-          transition: nullSelection
-          text: updateSelection
-          html: updateSelection
+          
+#### Modify DOM nodes
+
+Change the state of a DOM node
+          
           style: updateNode
           attr: updateNode
           property: updateNode
           'class': updateNode
           classed: updateNode
+          
+#### Change innerHTML and innerText          
+
+          text: updateSelection
+          html: updateSelection
+
+#### Events
+
+[d3.on](https://github.com/mbostock/d3/wiki/Selections#on) creates event listeners in d3.
+
           on: (template,selection,data,opts)-> 
             events = ['click']
             events.forEach (d)->
@@ -143,13 +192,18 @@ To avoid this behavior use datum.
                 d3.select @
                   .template template.value[d], data, opts
             selection
-This isn't part of d3, but it's useful.            
+            
+#### Arbitrary javascript functions 
+
+Execute block strings of javascript.
             
           js: (template,selection)->
             eval template.value
             selection
-            
-I overzealously used child in past templates and I forcing this rule.          
+
+#### Other
+
+> I overzealously used child in past templates and I forcing this rule.          
         
         @opts.rule.child = @opts.rule.call
         
@@ -179,6 +233,7 @@ Create ``tag`` with ``class1`` and ``class2`` along with an id ``anchor``
 - append: $#anchor
 ```
 
+## Create new DOM elements
 
       createNode = (template, selection) ->
         if template.value[0] == '$'
@@ -198,12 +253,16 @@ Create ``tag`` with ``class1`` and ``class2`` along with an id ``anchor``
         if id
           selection.attr id: id
         selection
+        
+## d3 merge operation        
 
       nullSelection = (template,selection) ->
         ###
         selection.key()
         ###
         selection[template.key]()
+
+## Change the state of DOM node
 
       updateNode = (template, selection) ->
         ###
@@ -218,6 +277,10 @@ Create ``tag`` with ``class1`` and ``class2`` along with an id ``anchor``
           .forEach (d)->
             selection[template.key] d.key, template.callback f d.value
         selection    
+        
+# Parser
+
+Parse keys, callbacks, and values.
         
       parseArgs: (template) ->
         ### 
