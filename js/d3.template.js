@@ -129,6 +129,9 @@
           }
           return updateSelection(selection, template);
         },
+        enter: nullSelection,
+        exit: nullSelection,
+        remove: nullSelection,
         call: function(template, selection, data, opts) {
           return selection['call']((function(_this) {
             return function(selection) {
@@ -137,6 +140,11 @@
           })(this));
         },
         each: function(template, selection, data, opts) {
+
+          /*
+          Pass the template, data, and current configurations
+          to each iteration
+           */
           return selection.each(function(d, i) {
             var ref;
             ref = [d, i], data.state = ref[0], data.index = ref[1];
@@ -145,17 +153,13 @@
         },
         insert: createNode,
         append: createNode,
-        enter: nullSelection,
-        exit: nullSelection,
-        remove: nullSelection,
-        transition: nullSelection,
-        text: updateSelection,
-        html: updateSelection,
         style: updateNode,
         attr: updateNode,
         property: updateNode,
         'class': updateNode,
         classed: updateNode,
+        text: updateSelection,
+        html: updateSelection,
         on: function(template, selection, data, opts) {
           var events;
           events = ['click'];
