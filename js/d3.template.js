@@ -10,11 +10,11 @@
     opts - optional rules and callbacks
      */
     return this.each(function(d, i) {
-      if (opts == null) {
-        opts = new Object;
-      }
       if (data == null) {
         data = new Object;
+      }
+      if (opts == null) {
+        opts = new Object;
       }
       if (data.state == null) {
         data.state = d;
