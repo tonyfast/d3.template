@@ -307,15 +307,20 @@ Parse keys, callbacks, and values.
         t = d3.values(template)[0]
         if typeof t == 'string'
           if t[..5] == '@this'
+            ### d3.select(this).property( args ) ###
             t = t[0] + t[5..]
             t = reduceKey t, @selection.node()
           else if t[..2] == '@i'
+            ### index of the selection ###
             t = @data.index
           else if t[0] == '@'
+            ### the data in the current selection ###
             t = reduceKey t, @data.state
           else if t[0] == ':'
+            ### :arg1.arg2 -- windows[arg1][arg2] ###
             t = reduceKey t, window
           else if t[0] == '\\'
+            ### escape character ####
             t = t[1..]
         else
           t

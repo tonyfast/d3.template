@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/tonyfast/d3.template.svg?branch=master)](https://travis-ci.org/tonyfast/d3.template)
+
 # ``d3.template`` 
 
 ``d3.template`` is a reactive templating engine for ``d3js`` to create HTML from structured data.
@@ -38,7 +40,7 @@ Let's make a ``<div></div>`` with a heading and subtext.
           }
         ]
     
-2. Pass the object to a ``d3.selection``
+2. Create a ``d3.selection``
     
         ###
         Append <div class="d3-template"></div> to the <body></body> tag
@@ -48,7 +50,7 @@ Let's make a ``<div></div>`` with a heading and subtext.
           .append 'div'
           .attr 'class', 'd3-template'
 
-3. ``d3.template`` iterates over the arrayed objects using d3-like syntaxes.
+3. Apply the template the selection
     
         ###
         The d3 selection ``div`` has class ``template`` that uses 
@@ -100,7 +102,7 @@ This readme is written in literate coffeescript and is used for the tutorial on 
 
 
 
-[![Build Status](https://travis-ci.org/tonyfast/d3.template.svg?branch=master)](https://travis-ci.org/tonyfast/d3.template)
+
 
 It is very easy to extend ``d3js`` beyond SVG elements to a DOM manipulation tool.  At it's core, d3 adds ``__data__`` to selected DOM
 elements then it adds convenience functions to insert derivatives of this data into the DOM.
