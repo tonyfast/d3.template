@@ -11,23 +11,22 @@ Create reusable designed patterns from structured data to created structured HTM
       ###
 
 
-Each element in the selection can data bound to it.  Each element in the
-new d3.template class has access to current selection, data, and user-defined configurations.
-    
+A selection can have data and other configuration options associated with it.
+
       @.each (d,i) ->
-        opts ?= new Object
         data ?= new Object
-        
-The current state of the dom-node        
-        
+        opts ?= new Object
+
+Each selection has data and an index to it.
+
         data.state ?= d
         data.index ?= i
 
-Define a class to manage the templates, selections, data, and options
+Define a class to manage the templates, selections, data, and options.
 
         new templater template, d3.select(@), data, opts
     
-``template`` creates a reactive state for d3 elements and data.
+``templater`` creates a reactive state for d3 elements and data.
       
     class templater
       constructor: ( template, @selection, @data, @opts ) ->
@@ -38,7 +37,7 @@ Define a class to manage the templates, selections, data, and options
         @init()
         
 ``template`` is an array of objects that use a simple syntaxes to generate
-a ``key``, ``value``, and ``callback``
+a ``key``, ``value``, and ``callback``.  Return the selection each time.
         
         template.forEach (_template) =>
           ###
@@ -69,7 +68,6 @@ a ``key``, ``value``, and ``callback``
 
 Build will concatenate values into strings when ``text`` and ``html`` are
 passed an array.
-
 
       build: ()->
         ###
@@ -102,7 +100,7 @@ passed an array.
           
 ## Initialize the rules for the d3 Core Api Selections.
 
-Create a rules for all of the [d3 selection API](https://github.com/mbostock/d3/wiki/Selections).
+Create a rule for all of the [d3 selection API](https://github.com/mbostock/d3/wiki/Selections).
           
         @update @opts['rule'] ?= new Object,
 

@@ -6,7 +6,9 @@ branches:
   only:
   - master
   
-before_script: coffee --compile -o js coffee
+before_script: 
+- coffee --compile -o js coffee
+- coffee --compile -o addon addon/coffee
 
 before_install:
 - npm install coffee-script
