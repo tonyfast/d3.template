@@ -1,5 +1,3 @@
----
----
 d3.selection.prototype.template = (template, opts )->
   ###
   template - a nested array object
