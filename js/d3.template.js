@@ -71,6 +71,7 @@
       '@this': "@",
       '@i': "index",
       '@': "data",
+      ':d3.templates': "document.__data__.template",
       ':': "window",
       '_': "document.__data__.current.template.__data__",
       '\\': ""
@@ -120,13 +121,14 @@
     The Call option 
     Can isolate data transforms and requests also it can great dom children
      */
-    return "." + template.key + " (selection)->\n\tconsole.log 's', selection\n\tdata=selection.datum() ? null\n\tselection";
+    debugger;
+    return ".call (selection)-> \n\tdata=selection.datum() ? null\n\tselection";
   };
 
   selectionEach = function(template) {
 
     /* Iterates over an existing dom selection */
-    return "." + template.key + " (data,index)->\n\td3.select @";
+    return ".each (data,index)->\n\td3.select @";
   };
 
   mountDOM = function(template) {
@@ -144,7 +146,7 @@
     output = [];
     if (template.value.startsWith('$')) {
       if (indexOf.call(template.value, '.') < 0) {
-        output.push("." + template.key + " " + (cbToString(template)) + "\"" + (template.value.slice(1)) + "\"");
+        output.push("." + template.key + " " + template.callback + "\"" + (template.value.slice(1)) + "\"");
       } else {
         ref = template.value.slice(1).split('.'), tagName = ref[0], classes = 2 <= ref.length ? slice.call(ref, 1) : [];
         len = classes.length - 1;
@@ -152,7 +154,7 @@
           ref1 = classes[len].split('#'), classes[len] = ref1[0], id = ref1[1];
         }
         if (tagName != null) {
-          output.push("." + template.key + " " + (cbToString(template)) + "'" + tagName + "'");
+          output.push("." + template.key + " " + template.callback + "'" + tagName + "'");
         }
         if (classes != null) {
           obj = {};
@@ -200,14 +202,14 @@
         template.value = d3.entries(template.value);
       }
     }
-    return "." + template.key + " " + (cbToString(template)) + valueString;
+    return "." + template.key + " " + template.callback + valueString;
   };
 
   updateSelection = function(template) {
 
     /* selection */
     var ref;
-    return "." + template.key + " " + (cbToString(template)) + ((ref = template.value) != null ? ref : null);
+    return "." + template.key + " " + template.callback + ((ref = template.value) != null ? ref : null);
   };
 
   updateDOM = function(template) {
@@ -220,7 +222,7 @@
       return "'" + d + "'";
     };
     return d3.entries(template.value).map(function(d, i) {
-      return "." + template.key + " '" + d.key + "', " + (cbToString(template)) + (classProcess(d.value));
+      return "." + template.key + " '" + d.key + "', " + template.callback + (classProcess(d.value));
     }).join('\n');
   };
 
@@ -237,9 +239,9 @@
     if (Array.isArray(template.value)) {
       template.value = template.value.map(function(d) {
         return objToString(d);
-      }).join(' ');
+      }).join('+');
     }
-    return "." + template.key + " " + (cbToString(template)) + ((ref = template.value) != null ? ref : '');
+    return "." + template.key + " " + template.callback + ((ref = template.value) != null ? ref : '');
   };
 
   cbToString = function(template) {
@@ -260,61 +262,68 @@
     * return __data__ to append to template object
     method and default take different arguments
      */
-    if (!document['__data__']) {
-
-      /* d3 initialize ``document.__data__`` */
-      d3.select(document).datum(function(d) {
-        return d != null ? d : {};
-      });
-      return document.__data__ = {
-        request: {},
-        current: {
-          selection: null,
-          template: null
+    var init;
+    init = {
+      request: {},
+      current: {
+        selection: null,
+        template: null
+      },
+      template: {},
+      callback: {
+        'echo': function(d) {
+          console.log(d);
+          return d;
+        }
+      },
+      "default": {
+        call: selectionCall,
+        child: selectionCall,
+        each: selectionEach,
+        insert: mountDOM,
+        append: mountDOM,
+        data: updateData,
+        datum: updateData,
+        select: updateSelection,
+        selectAll: updateSelection,
+        attr: updateDOM,
+        property: updateDOM,
+        style: updateDOM,
+        classed: updateDOM,
+        enter: nullSelection,
+        exit: nullSelection,
+        transition: nullSelection,
+        remove: nullSelection,
+        text: updateInner,
+        html: updateInner
+      },
+      method: {
+        test: function(selection, obj) {
+          return console.log('test rule echos: ', obj);
         },
-        template: {},
-        callback: {
-          'echo': function(d) {
-            console.log(d);
-            return d;
-          }
+        js: function(selection, obj) {
+          return eval(obj);
         },
-        "default": {
-          call: selectionCall,
-          each: selectionEach,
-          insert: mountDOM,
-          append: mountDOM,
-          data: updateData,
-          datum: updateData,
-          select: updateSelection,
-          selectAll: updateSelection,
-          attr: updateDOM,
-          property: updateDOM,
-          style: updateDOM,
-          classed: updateDOM,
-          enter: nullSelection,
-          exit: nullSelection,
-          transition: nullSelection,
-          remove: nullSelection,
-          text: updateInner,
-          html: updateInner
-        },
-        method: {
-          test: function(selection, obj) {
-            return console.log('test rule echos: ', obj);
-          },
-          js: function(selection, obj) {
-            return eval(obj.value);
-          },
-          request: function(selection, obj, onComplete) {
-            var makeRequest;
-            makeRequest = function(req) {
-              var name, ref, type;
-              if (req.length === 0 && onComplete) {
-                return onComplete();
+        request: function(selection, obj, onComplete) {
+          var makeRequest;
+          makeRequest = function(req) {
+            var name, ref, type;
+            if (req.length === 0 && onComplete) {
+              return onComplete();
+            } else {
+              ref = req[0].key.split('.'), name = ref[0], type = ref[1];
+              if (document.__data__.request[name]) {
+                selection.datum(function(d) {
+                  if (d == null) {
+                    d = {};
+                  }
+                  d[name] = document.__data__.request[name];
+                  return d;
+                });
+                return makeRequest(req.slice(1));
               } else {
-                ref = req[0].key.split('.'), name = ref[0], type = ref[1];
-                if (document.__data__.request[name]) {
+                return d3[type != null ? type : 'text'](req[0].value, function(e, d) {
+                  document.__data__.request[name] = d;
                   selection.datum(function(d) {
                     if (d == null) {
                       d = {};
@@ -323,49 +332,43 @@
                     return d;
                   });
                   return makeRequest(req.slice(1));
-                } else {
-                  return d3[type != null ? type : 'text'](req[0].value, function(e, d) {
-                    document.__data__.request[name] = d;
-                    selection.datum(function(d) {
-                      if (d == null) {
-                        d = {};
-                      }
-                      d[name] = document.__data__.request[name];
-                      return d;
-                    });
-                    return makeRequest(req.slice(1));
-                  });
-                }
+                });
               }
-            };
-            return makeRequest(d3.entries(obj).filter(function(d) {
-              var ref;
-              return !((ref = d.key) === 'call' || ref === 'baseurl');
-            }));
-          }
+            }
+          };
+          return makeRequest(d3.entries(obj).filter(function(d) {
+            var ref;
+            return !((ref = d.key) === 'call' || ref === 'baseurl');
+          }));
         }
-      };
+      }
+    };
+    if (document['__data__'] == null) {
+      document['__data__'] = {};
     }
+    return d3.entries(init).forEach(function(opt) {
+      var base, name1;
+      if ((base = document['__data__'])[name1 = opt.key] == null) {
+        base[name1] = {};
+      }
+      return document['__data__'][opt.key] = d3.extend(document['__data__'][opt.key], opt.value);
+    });
   };
 
   updateOpts = function(opts) {
     var __data__, ref, ref1;
-    if (opts) {
-      ref1 = [
-        (ref = opts.__data__) != null ? ref : null, d3.entries(opts).filter(function(d) {
-          var ref1;
-          return (ref1 = !d['key']) === '__data__';
-        })
-      ], __data__ = ref1[0], opts = ref1[1];
-      d3.entries(document.__data__).forEach(function(d) {
-        if (opts[d.key]) {
-          return document.__data__[d.key] = d3.merge(opts[d.key], d.value);
-        } else {
-          return document.__data__[d.key] = d.value;
-        }
+    ref1 = [
+      (ref = opts.__data__) != null ? ref : null, d3.entries(opts).filter(function(d) {
+        var ref1;
+        return !((ref1 = d['key']) === '__data__');
+      })
+    ], __data__ = ref1[0], opts = ref1[1];
+    if (opts != null) {
+      opts.forEach(function(opt) {
+        return document.__data__[opt.key] = d3.extend(document.__data__[opt.key], opt.value);
       });
     }
-    return __data__ != null ? __data__ : null;
+    return __data__;
   };
 
 
@@ -383,20 +386,24 @@
 
       /*  write execution of custom method in coffeescrippt */
       reserved = ['call', 'each'];
-      val = {};
-      d3.entries(template.value).filter(function(d) {
-        var ref;
-        if (ref = d.key, indexOf.call(reserved, ref) >= 0) {
-          return false;
-        } else {
-          return true;
-        }
-      }).forEach(function(d) {
-        return val[d.key] = d.value;
-      });
+      if (typeof template.value === 'string') {
+        val = template.value;
+      } else {
+        val = {};
+        d3.entries(template.value).filter(function(d) {
+          var ref;
+          if (ref = d.key, indexOf.call(reserved, ref) >= 0) {
+            return false;
+          } else {
+            return true;
+          }
+        }).forEach(function(d) {
+          return val[d.key] = d.value;
+        });
+      }
 
       /* Append more templates to selection on next pass */
-      return ".call (selection)->\n\tdocument.__data__.method['" + template.key + "'] selection, " + (JSON.stringify(val)) + ", ()-> selection\\";
+      return ".call (selection)->\n\tdocument.__data__.method['" + template.key + "'] selection, " + (JSON.stringify(val)) + ", ()-> selection";
     } else {
       return ".call (selection)->\n\tconsole.log 'The is no rule " + template.key + " defined'";
     }
@@ -451,6 +458,7 @@
         onComplete = {};
         onComplete[onCompleteKey] = template.value[onCompleteKey];
         if ((template.value['call'] != null) || (template.value['each'] != null)) {
+          output[output.length - 1] = output[output.length - 1] + "\\";
           return output.push(templateToCoffee([onComplete], [], level + 1, index));
         }
       }
