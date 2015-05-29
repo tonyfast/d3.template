@@ -1,0 +1,45 @@
+body:
+  - append: div
+  # container style copy and pasted from bootstrap
+  - style: {padding-right: 15px,padding-left: 15px,margin-right: auto,margin-left: auto,width: 80%}
+  - datum:
+      name: d3.template
+  - call:
+    - append: h1
+    - html.echo: 
+      - <pre><code>
+      - '@name'
+      - </code></pre>
+  - call:
+    - append: p
+    - html: 
+        - <b>
+        - "@name"
+        - "</b> "
+        - > 
+          is a data-driven reactive template engine.  Structured presentation and data can 
+          easily be combined to create rich interative webpages.
+  - call:
+    - append: h2
+    - text: Dependencies
+  - call:
+    - append: ul
+    - selectAll: li
+    - data: 
+        d3js: http://d3js.org
+        coffeescript: http://coffeescript.org
+    - enter: 
+    - append: li    
+    - each:
+      - append: a
+      - attr:
+          href: '@value'
+      - text: '@value'
+  - call:
+    - append: h2
+    - text: JSONified version of the original template
+  - call:
+    - append: pre
+    - style: {background-color: lightgray}
+    - append: code
+    - text.stringify: :document.__data__.template.body.object
