@@ -357,16 +357,19 @@
 
   updateOpts = function(opts) {
     var __data__, ref, ref1;
-    ref1 = [
-      (ref = opts.__data__) != null ? ref : null, d3.entries(opts).filter(function(d) {
-        var ref1;
-        return !((ref1 = d['key']) === '__data__');
-      })
-    ], __data__ = ref1[0], opts = ref1[1];
+    __data__ = null;
     if (opts != null) {
-      opts.forEach(function(opt) {
-        return document.__data__[opt.key] = d3.extend(document.__data__[opt.key], opt.value);
-      });
+      ref1 = [
+        (ref = opts.__data__) != null ? ref : null, d3.entries(opts).filter(function(d) {
+          var ref1;
+          return !((ref1 = d['key']) === '__data__');
+        })
+      ], __data__ = ref1[0], opts = ref1[1];
+      if (opts != null) {
+        opts.forEach(function(opt) {
+          return document.__data__[opt.key] = d3.extend(document.__data__[opt.key], opt.value);
+        });
+      }
     }
     return __data__;
   };
