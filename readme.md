@@ -29,9 +29,11 @@ and the most basic example of d3.template.
         
 4. Append YAML text and final HTML to the template contexts.
         
-        document.__data__.template.body = 
-          yaml: d
-          html: body.html()
+        document.__data__.template.body.yaml= d
+        document.__data__.template.body.html= body.select('.hello-world').html()
+          .split '><'
+          .join '>\n<'
+          
           
 ## Benefits of d3.template
 
@@ -48,6 +50,25 @@ All of the contexts are contained in ``document.__data__.template.body``.  Open 
 
         console.log 'All of the template contexts are presented in the object below'
         console.log document.__data__.template.body
-        
 
+### Add some interactions
+
+        body.select '#toggle-context'
+          .datum 
+            keys: d3.keys document.__data__.template.body
+            index: -1
+          .on 'click', (d)->
+            @__data__.index = d.index = d.index + 1
+            if d.index == d.keys.length
+              @__data__.index = d.index = 0
+            key = d.keys[d.index]
+            @innerText = key
+            d3.select '#view-context'
+              .text document.__data__.template.body[key]
+              .call (s)-> 
+                s.attr 'class', key
+                hljs.highlightBlock s.node()
+                
+            
+        
     
