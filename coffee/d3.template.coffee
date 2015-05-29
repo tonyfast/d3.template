@@ -255,12 +255,14 @@ initTemplate = (opts)->
 
         
 updateOpts = (opts)->
-  [__data__, opts ] = 
-    [ opts.__data__ ? null, d3.entries(opts).filter (d)-> not(d['key'] in ['__data__']) ]
+  __data__  = null
   if opts?
-    opts.forEach (opt)->
-        document.__data__[opt.key] = d3.extend document.__data__[opt.key], opt.value
-  __data__
+    [__data__, opts ] = 
+      [ opts.__data__ ? null, d3.entries(opts).filter (d)-> not(d['key'] in ['__data__']) ]
+    if opts?
+      opts.forEach (opt)->
+          document.__data__[opt.key] = d3.extend document.__data__[opt.key], opt.value
+  __data__ 
   
     
 ### methods convert yaml syntaxes to coffeescript code ###
