@@ -50,8 +50,7 @@
     }
 
     /* convert actions to coffeescript */
-    coffee = templateToCoffee(template, ["selection=document.__data__.current.selection", "data=selection.datum()", "selection"], 1, -1);
-    console.log(coffee);
+    coffee = templateToCoffee(template, ["selection=document.__data__.current.selection", "data=selection.node().__data__", "selection"], 1, -1);
     document.__data__.template[key].coffee = key ? coffee : void 0;
     document.__data__.template[key].js = CoffeeScript.compile(coffee, {
       bare: true
@@ -62,7 +61,7 @@
 
   /* Convert to values instead of strings */
 
-  objToString = function(value) {
+  objToString = function(value, noQuote) {
 
     /* Transform rule object to coffeescript string prefix */
     var prefix, ref, ref1, stringvalue, templateToValueString;
@@ -105,9 +104,11 @@
           /* wrap in single quotes */
           return "\"" + stringvalue.value + "\"";
         }
-      } else {
+      } else if ((noQuote != null) && noQuote) {
 
         /* wrap in double quotes to activate string interpolation */
+        return "" + value;
+      } else {
         return "\"" + value + "\"";
       }
     } else {
@@ -121,8 +122,7 @@
     The Call option 
     Can isolate data transforms and requests also it can great dom children
      */
-    debugger;
-    return ".call (selection)-> \n\tdata=selection.datum() ? null\n\tselection";
+    return ".call (selection)-> \n\tdata=selection.node().__data__ ? null\n\tselection";
   };
 
   selectionEach = function(template) {
@@ -189,7 +189,7 @@
     var ref, ref1, ref2, valueString;
     if ((ref = typeof template.value) === 'object') {
       d3.entries(template.value).forEach(function(d) {
-        return template.value[d.key] = objToString(d.value);
+        return template.value[d.key] = objToString(d.value, true);
       });
       valueString = JSON.stringify(template.value);
     } else {
@@ -199,7 +199,7 @@
       if (((ref2 = typeof template.value) === 'object') && !Array.isArray(template.value)) {
 
         /* Convert object to d3.entry */
-        template.value = d3.entries(template.value);
+        valueString = JSON.stringify(d3.entries(template.value));
       }
     }
     return "." + template.key + " " + template.callback + valueString;
@@ -219,8 +219,14 @@
     classProcess = (ref = template.key) === 'classed' ? function(d) {
       return "" + (d != null);
     } : function(d) {
-      return "'" + d + "'";
+      return "" + d;
     };
+    d3.entries(template.value).forEach(function(value) {
+      template.value[value.key] = objToString(value.value, true);
+      if (template.value[value.key] === value.value) {
+        return template.value[value.key] = "'" + template.value[value.key] + "'";
+      }
+    });
     return d3.entries(template.value).map(function(d, i) {
       return "." + template.key + " '" + d.key + "', " + template.callback + (classProcess(d.value));
     }).join('\n');
@@ -271,9 +277,12 @@
       },
       template: {},
       callback: {
-        'echo': function(d) {
+        echo: function(d) {
           console.log(d);
           return d;
+        },
+        stringify: function(d) {
+          return JSON.stringify(d, null, 2);
         }
       },
       "default": {
@@ -357,8 +366,7 @@
 
   updateOpts = function(opts) {
     var __data__, ref, ref1;
-    __data__ = null;
-    if (opts != null) {
+    if (opts) {
       ref1 = [
         (ref = opts.__data__) != null ? ref : null, d3.entries(opts).filter(function(d) {
           var ref1;
@@ -370,8 +378,8 @@
           return document.__data__[opt.key] = d3.extend(document.__data__[opt.key], opt.value);
         });
       }
+      return __data__;
     }
-    return __data__;
   };
 
 
@@ -419,53 +427,55 @@
     index: value of array loop (-1 : not Array)
      */
     var indentBlockString;
-    indentBlockString = function(indent, lines) {
-      return lines.split('\n').map(function(line) {
-        return "" + indent + line;
-      }).join('\n');
-    };
-    level = level + 1;
-    template.forEach(function(template) {
-      var indent, onComplete, onCompleteKey, parsed, ref, ref1, ref2, ref3, ref4;
-      template = d3.entries(template)[0];
-      ref = template['key'].split('.'), template['key'] = ref[0], template['callback'] = ref[1];
+    if (template) {
+      indentBlockString = function(indent, lines) {
+        return lines.split('\n').map(function(line) {
+          return "" + indent + line;
+        }).join('\n');
+      };
+      level = level + 1;
+      template.forEach(function(template) {
+        var indent, onComplete, onCompleteKey, parsed, ref, ref1, ref2, ref3, ref4;
+        template = d3.entries(template)[0];
+        ref = template['key'].split('.'), template['key'] = ref[0], template['callback'] = ref[1];
 
-      /* classed is a dumb name */
-      if ((ref1 = template['key']) === 'class') {
-        template['key'] = 'classed';
-      }
-
-      /* Stringified version of callback in coffee */
-      template['callback'] = cbToString(template);
-
-      /* stringify value if necessary */
-      if (ref2 = template['key'], indexOf.call(d3.keys(document.__data__["default"]), ref2) >= 0) {
-
-        /* text and html can concatentate array elements as a special case */
-        template['value'] = objToString(template['value']);
-      }
-
-      /* Coffeescript is whitespace aware and is lovely to read */
-      indent = d3.range(level).map(function(d) {
-        return '';
-      }).join('\t');
-      parsed = methodToCoffee(template);
-      output.push(indentBlockString(indent, parsed));
-      if ((ref3 = template['key']) === 'call' || ref3 === 'each') {
-        output.push(templateToCoffee(template.value, [], level, index));
-      }
-      if (ref4 = template['key'], indexOf.call(d3.keys(document.__data__.method), ref4) >= 0) {
-        onCompleteKey = d3.keys(template.value).filter(function(d) {
-          return d === 'call' || d === 'each';
-        })[0];
-        onComplete = {};
-        onComplete[onCompleteKey] = template.value[onCompleteKey];
-        if ((template.value['call'] != null) || (template.value['each'] != null)) {
-          output[output.length - 1] = output[output.length - 1] + "\\";
-          return output.push(templateToCoffee([onComplete], [], level + 1, index));
+        /* classed is a dumb name */
+        if ((ref1 = template['key']) === 'class') {
+          template['key'] = 'classed';
         }
-      }
-    });
+
+        /* Stringified version of callback in coffee */
+        template['callback'] = cbToString(template);
+
+        /* stringify value if necessary */
+        if (ref2 = template['key'], indexOf.call(d3.keys(document.__data__["default"]), ref2) >= 0) {
+
+          /* text and html can concatentate array elements as a special case */
+          template['value'] = objToString(template['value']);
+        }
+
+        /* Coffeescript is whitespace aware and is lovely to read */
+        indent = d3.range(level).map(function(d) {
+          return '';
+        }).join('\t');
+        parsed = methodToCoffee(template);
+        output.push(indentBlockString(indent, parsed));
+        if ((ref3 = template['key']) === 'call' || ref3 === 'each') {
+          output.push(templateToCoffee(template.value, [], level, index));
+        }
+        if (ref4 = template['key'], indexOf.call(d3.keys(document.__data__.method), ref4) >= 0) {
+          onCompleteKey = d3.keys(template.value).filter(function(d) {
+            return d === 'call' || d === 'each';
+          })[0];
+          onComplete = {};
+          onComplete[onCompleteKey] = template.value[onCompleteKey];
+          if ((template.value['call'] != null) || (template.value['each'] != null)) {
+            output[output.length - 1] = output[output.length - 1] + "\\";
+            return output.push(templateToCoffee([onComplete], [], level + 1, index));
+          }
+        }
+      });
+    }
     return output.join('\n');
   };
 
