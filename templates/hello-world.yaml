@@ -9,9 +9,9 @@ body:
     - call:
       - append: h1
       - html.echo: 
-        - <pre><code>
+        - <pre><code><a href='https://github.com/tonyfast/d3.template'>
         - '@name'
-        - </code></pre>
+        - </a></code></pre>
     - call:
       - append: p
       - html: 
