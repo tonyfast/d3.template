@@ -1,6 +1,6 @@
 # ``d3.template`` Hello World
 
-Data-driven webpages from structured data.
+Data-driven webpages from structured data.  This example is created from [hello-world.yaml](hello-world.yaml).
 
 ## About this readme
 
