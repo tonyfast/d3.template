@@ -67,8 +67,8 @@ All of the contexts are contained in ``document.__data__.template.body``.  Open 
             @innerText = key
             d3.select '#view-context'
               .text ()->
-                if key in ['__data__']
-                  out = JSON.stringify document.__data__.template.body[key]
+                if key in ['__data__','object']
+                  out = JSON.stringify document.__data__.template.body[key], null, 2
                   key = 'json'
                   out 
                 else
