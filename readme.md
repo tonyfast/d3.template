@@ -25,7 +25,9 @@ and the most basic example of d3.template.
   
 3. Apply the template to the selection
 
-        body.template yaml
+        body.template yaml, \
+          __data__: 
+            'private-data': "Available to the template in ``_data``"
         
 4. Append YAML text and final HTML to the template contexts.
         
@@ -64,7 +66,13 @@ All of the contexts are contained in ``document.__data__.template.body``.  Open 
             key = d.keys[d.index]
             @innerText = key
             d3.select '#view-context'
-              .text document.__data__.template.body[key]
+              .text ()->
+                if key in ['__data__']
+                  out = JSON.stringify document.__data__.template.body[key]
+                  key = 'json'
+                  out 
+                else
+                  document.__data__.template.body[key]
               .call (s)-> 
                 s.attr 'class', key
                 hljs.highlightBlock s.node()

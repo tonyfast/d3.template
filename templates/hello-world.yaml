@@ -40,8 +40,8 @@ body:
   - call:
     - append: h2
     - html: 
-      - <a id='toggle-context'>JSON</a>
-      - ified version of the original template
+      - <big><a id='toggle-context'>JSON</a></big>
+      - "-ified version of the original template"
     - select: a
     - style: {color: red}
   - call:
