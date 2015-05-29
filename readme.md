@@ -55,6 +55,8 @@ All of the contexts are contained in ``document.__data__.template.body``.  Open 
 
 ### Add some interactions
 
+> The interactions are built on DOM elements built by ``d3.template``
+
         body.select '#toggle-context'
           .datum 
             keys: d3.keys document.__data__.template.body
