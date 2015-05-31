@@ -1,0 +1,10 @@
+<nav>
+  <div class="nav-wrapper">
+    <a href="#" class="brand-logo">Continuum</a>
+    <ul id="nav-mobile" class="right hide-on-med-and-down">
+      {% for tool in site.data.tools %}
+        <li><a href="{{tool.url}}" id="{{tool.id}}">{{tool.name}}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</nav>

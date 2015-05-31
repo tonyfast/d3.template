@@ -1,0 +1,10 @@
+- url: '#'
+  name: Read
+- url: '#'
+  name: Edit
+  id: 'edit-trigger'
+- url: '#'
+  name: Explore
+- url: '#'
+  name: Innovate
+  

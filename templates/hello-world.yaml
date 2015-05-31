@@ -37,16 +37,17 @@ body:
         - attr:
             href: '@value'
         - text: '@value'
-  - call:
-    - append: h2
-    - html: 
-      - <big><a id='toggle-context'>JSON</a></big>
-      - "-ified version of the original template"
-    - select: a
-    - style: {color: red}
-  - call:
-    - append: pre
-    - style: {background-color: lightgray}
-    - append: code
-    - attr: {id: view-context}
-    - text.stringify: :document.__data__.template.body.object
+        
+#- call:
+#  - append: h2
+#  - html: 
+#    - <big><a id='toggle-context'>JSON</a></big>
+#    - "-ified version of the original template"
+#  - select: a
+#  - style: {color: red}
+#- call:
+#  - append: pre
+#  - style: {background-color: lightgray}
+#  - append: code
+#  - attr: {id: view-context}
+#  - text.stringify: :document.__data__.template.body.object

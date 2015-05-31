@@ -1,28 +1,103 @@
+---
+# Trigger Jekyll Interpreter
+---
 <!doctype html>
 <html>
   <head>
-    <script src="bower_components/d3/d3.min.js">
-      </script>
-    <script src="bower_components/marked/marked.min.js">
-      </script>
-    <script src="bower_components/js-yaml/dist/js-yaml.min.js">
-      </script>
-    <script src="js/coffee-script.js">
-      </script>
-    <!-- 
-      These dependencies are built with Travis-CI 
-      Rawgit is the cdn.
-    -->
-    <script src="https://rawgit.com/tonyfast/d3.template/master/js/d3.template.js">
-      </script>
-    <script src="https://rawgit.com/tonyfast/d3.template/master/addon/d3.getScript.js">
-      </script>
-    <script src="//cdn.jsdelivr.net/highlight.js/8.6/highlight.min.js">
-      </script>
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/default.min.css">
+    {% include head.html %}
   </head>
   <body>  
-    <script type="text/literate-coffeescript" src="readme.md">
+    {% include sidenav.html %}
+    {% include modal.html id='edit-modal'%}
+    <div id="context" class="container">
+      <div id="context-value"></div>
+    </div>
+    <script src="{{site.baseurl}}/coffee/app.js">
       </script>
   </body>
 </html>
+
+
+<!--
+      ;(function(){
+        
+        //ZeroClipboad
+        var client = new ZeroClipboard( document.getElementById("copy-button") );
+
+        client.on( "ready", function( readyEvent ) {
+          // alert( "ZeroClipboard SWF is ready!" );
+
+          client.on( "aftercopy", function( event ) {
+            // `this` === `client`
+            // `event.target` === the element that was clicked
+            //event.target.style.display = "none";
+            alert("Copied text to clipboard: " + event.data["text/plain"] );
+          } );
+        } );
+        
+        $(".button-collapse").sideNav({
+          menuWidth: 300, // Default is 240
+          edge: 'left', // Choose the horizontal origin
+          closeOnClick: false // Closes side-nav on <a> clicks, useful for Angular/Meteor
+        });
+        d3.select('.modal,.modal textarea')
+          .style('height','100%');
+        $('.modal-trigger').leanModal({
+            dismissible: true, // Modal can be dismissed by clicking outside of the modal
+            opacity: .7, // Opacity of modal background
+            in_duration: 300, // Transition in duration
+            out_duration: 200, // Transition out duration
+            ready: function() { /**alert('Ready');**/ }, // Callback for Modal open
+            complete: function() { /**alert('Closed');**/ } // Callback for Modal close
+          }
+        );
+        
+        d3.select('#view-list')
+          .selectAll('li')
+          .on('click',function(){            
+            var data = document.__data__.template.body[this.dataset.lang],
+                header = d3.select('#header-lang'),
+                context = d3.select('#context');
+            context.text(function(){
+                  if(typeof data == 'object'){
+                    return JSON.stringify(data, null,2);
+                  } else {
+                    return data;
+                  }
+              });
+            if(this.dataset.lang != 'preview'){
+              var text = context.text();
+              var code = context
+                .html(null)
+                  .append('pre')
+                .append('code')
+                .attr('id','context-value')
+                .attr('class', this.dataset.lang )
+                .text(text);
+              context.classed({
+                container: true
+              });
+              hljs.highlightBlock(code.node());
+              header.text( 'as ' + this.innerText  )
+            } else {
+              context
+                .append('div')
+                .classed({
+                  preview: true
+                })
+                .html(document.__data__.template.body['html'])
+                .attr('id','context-value');
+              header.text( this.innerText )
+            }
+          })  
+      // code mirror
+      
+      d3.select('#place-holder')
+        .on( 'click', function(){
+          // update context
+          d3.select('#context-value')
+          template.getValue()
+        })
+
+      })();
+-->

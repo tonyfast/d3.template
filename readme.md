@@ -21,21 +21,21 @@ and the most basic example of d3.template.
 
   This hello-world example will change the webpage ``<body>``.
     
-        body = d3.select 'body'
+        body = d3.select '#context'
   
 3. Apply the template to the selection
 
-        body.template yaml, \
-          __data__: 
-            'private-data': "Available to the template in ``_data``"
+        body.select '#context-value'
+          .template yaml, \
+            __data__: 
+              'private-data': "Available to the template in ``_data``"
         
 4. Append YAML text and final HTML to the template contexts.
         
         document.__data__.template.body.yaml= d
         document.__data__.template.body.html= body.select('.hello-world').html()
           .split '><'
-          .join '>\n<'
-          
+          .join '>\n<'          
           
 ## Benefits of d3.template
 
@@ -57,28 +57,12 @@ All of the contexts are contained in ``document.__data__.template.body``.  Open 
 
 > The interactions are built on DOM elements built by ``d3.template``
 
-        body.select '#toggle-context'
-          .datum 
-            keys: d3.keys document.__data__.template.body
-            index: -1
-          .on 'click', (d)->
-            @__data__.index = d.index = d.index + 1
-            if d.index == d.keys.length
-              @__data__.index = d.index = 0
-            key = d.keys[d.index]
-            @innerText = key
-            d3.select '#view-context'
-              .text ()->
-                if key in ['__data__','object']
-                  out = JSON.stringify document.__data__.template.body[key], null, 2
-                  key = 'json'
-                  out 
-                else
-                  document.__data__.template.body[key]
-              .call (s)-> 
-                s.attr 'class', key
-                hljs.highlightBlock s.node()
-                
-            
         
-    
+        ###
+        editor = d3.select '#edit-modal .modal-content textarea'
+        template = CodeMirror.fromTextArea editor.node(), 
+            theme: "blackboard"
+            lineWrapping: true
+        ###
+
+
