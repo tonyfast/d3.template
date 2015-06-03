@@ -27,11 +27,12 @@ cm = d3.select '#context'
   .style 'display','none'
   
 document.__data__ = 
-  editor: CodeMirror cm.node(), \
+  editor: CodeMirror cm.node(), 
           theme: "blackboard"
           mode: "yaml"
           lineNumbers: true
           lineWrapping: true
+          readOnly: "nocursor"
           extraKeys: 
             "Ctrl-Q": (cm)->cm.foldCode cm.getCursor()
           foldGutter: 
