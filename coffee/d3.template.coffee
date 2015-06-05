@@ -209,7 +209,7 @@ initTemplate = (opts)->
   method and default take different arguments
   ###
     
-  document.__data__ = 
+  init = 
     request: {}
     current: {selection:null,template:null}
     template: {}
