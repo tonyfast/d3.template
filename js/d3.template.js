@@ -268,7 +268,8 @@
     * return __data__ to append to template object
     method and default take different arguments
      */
-    document.__data__ = {
+    var init;
+    init = {
       request: {},
       current: {
         selection: null,
