@@ -235,7 +235,7 @@
   nullSelection = function(template) {
 
     /* enter, exit, transition, remove */
-    return "." + template.key + "()";
+    return ".call (selection)->\n\tselection." + template.key + "()";
   };
 
   updateInner = function(template) {
@@ -268,8 +268,7 @@
     * return __data__ to append to template object
     method and default take different arguments
      */
-    var init;
-    init = {
+    document.__data__ = {
       request: {},
       current: {
         selection: null,
@@ -277,17 +276,13 @@
       },
       template: {},
       callback: {
-        echo: function(d) {
+        'echo': function(d) {
           console.log(d);
           return d;
-        },
-        stringify: function(d) {
-          return JSON.stringify(d, null, 2);
         }
       },
       "default": {
         call: selectionCall,
-        child: selectionCall,
         each: selectionEach,
         insert: mountDOM,
         append: mountDOM,
@@ -299,10 +294,10 @@
         property: updateDOM,
         style: updateDOM,
         classed: updateDOM,
-        enter: nullSelection,
-        exit: nullSelection,
-        transition: nullSelection,
-        remove: nullSelection,
+        'call.enter': nullSelection,
+        'call.exit': nullSelection,
+        'call.transition': nullSelection,
+        'call.remove': nullSelection,
         text: updateInner,
         html: updateInner
       },
@@ -311,17 +306,16 @@
           return console.log('test rule echos: ', obj);
         },
         js: function(selection, obj) {
-          return eval(obj);
+          return eval(obj.value);
         },
         request: function(selection, obj, onComplete) {
           var makeRequest;
           makeRequest = function(req) {
-            var name, ref, type;
             if (req.length === 0 && onComplete) {
               return onComplete();
             } else {
-              ref = req[0].key.split('.'), name = ref[0], type = ref[1];
-              if (document.__data__.request[name]) {
+              return d3[typeof type !== "undefined" && type !== null ? type : 'text'](req[0].value, function(e, d) {
+                document.__data__.request[name] = d;
                 selection.datum(function(d) {
                   if (d == null) {
                     d = {};
@@ -330,19 +324,7 @@
                   return d;
                 });
                 return makeRequest(req.slice(1));
-              } else {
-                return d3[type != null ? type : 'text'](req[0].value, function(e, d) {
-                  document.__data__.request[name] = d;
-                  selection.datum(function(d) {
-                    if (d == null) {
-                      d = {};
-                    }
-                    d[name] = document.__data__.request[name];
-                    return d;
-                  });
-                  return makeRequest(req.slice(1));
-                });
-              }
+              });
             }
           };
           return makeRequest(d3.entries(obj).filter(function(d) {
@@ -427,15 +409,15 @@
     index: value of array loop (-1 : not Array)
      */
     var indentBlockString;
-    if (template) {
-      indentBlockString = function(indent, lines) {
-        return lines.split('\n').map(function(line) {
+    return indentBlockString = function(indent, lines) {
+      if (template) {
+        lines.split('\n').map(function(line) {
           return "" + indent + line;
         }).join('\n');
-      };
+      }
       level = level + 1;
       template.forEach(function(template) {
-        var indent, onComplete, onCompleteKey, parsed, ref, ref1, ref2, ref3, ref4;
+        var onComplete, onCompleteKey, parsed, ref, ref1, ref2, ref3, ref4;
         template = d3.entries(template)[0];
         ref = template['key'].split('.'), template['key'] = ref[0], template['callback'] = ref[1];
 
@@ -460,23 +442,26 @@
         }).join('\t');
         parsed = methodToCoffee(template);
         output.push(indentBlockString(indent, parsed));
-        if ((ref3 = template['key']) === 'call' || ref3 === 'each') {
+        if ((ref3 = template['key'].slice(0, 4)) === 'call' || ref3 === 'each') {
+
+          /* Branching data and null selections */
           output.push(templateToCoffee(template.value, [], level, index));
         }
         if (ref4 = template['key'], indexOf.call(d3.keys(document.__data__.method), ref4) >= 0) {
+
+          /* Methods */
           onCompleteKey = d3.keys(template.value).filter(function(d) {
             return d === 'call' || d === 'each';
           })[0];
           onComplete = {};
           onComplete[onCompleteKey] = template.value[onCompleteKey];
           if ((template.value['call'] != null) || (template.value['each'] != null)) {
-            output[output.length - 1] = output[output.length - 1] + "\\";
             return output.push(templateToCoffee([onComplete], [], level + 1, index));
           }
         }
       });
-    }
-    return output.join('\n');
+      return output.join('\n');
+    };
   };
 
   d3.extend = function(obj1, obj2) {
