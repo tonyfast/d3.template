@@ -15,7 +15,6 @@ d3.selection.prototype.template = (template, opts )->
   ### initialize document.__data__ and d3.template objects ###
   initTemplate()
   __data__ = updateOpts opts
-  
   ### split key and value from template if they exist. ###
   [key,template] = unless Array.isArray template
     [d3.keys( template )[0],d3.values( template )[0]]
@@ -38,21 +37,22 @@ d3.selection.prototype.template = (template, opts )->
     
   ### convert actions to coffeescript ###
   coffee = templateToCoffee template,
-    ["selection=document.__data__.current.selection","data=selection.datum()","selection"], 
+    ["selection=document.__data__.current.selection","data=selection.node().__data__","selection"], 
     1, -1
-  console.log coffee
+  
   document.__data__.template[key].coffee = if key then coffee    
   document.__data__.template[key].js = CoffeeScript.compile coffee, {bare:true}
   eval document.__data__.template[key].js
 
 ### Convert to values instead of strings ###
-objToString = (value) ->  
+objToString = (value, noQuote) ->  
   ### Transform rule object to coffeescript string prefix ###
   prefix = 
     '$': ""
     '@this': "@"
     '@i': "index"
     '@': "data"
+    ':d3.templates': "document.__data__.template"
     ':': "window"
     '_': "document.__data__.current.template.__data__"
     '\\': ""
@@ -81,8 +81,10 @@ objToString = (value) ->
       else
         ### wrap in single quotes ###
         "\"#{stringvalue.value}\""
-    else
+    else if noQuote? and noQuote
       ### wrap in double quotes to activate string interpolation ###
+      "#{value}"
+    else 
       "\"#{value}\""
   else
     value
@@ -94,16 +96,15 @@ selectionCall = (template)->
   Can isolate data transforms and requests also it can great dom children
   ###
   """
-  .#{template.key} (selection)->
-  \tconsole.log 's', selection
-  \tdata=selection.datum() ? null
+  .call (selection)-> 
+  \tdata=selection.node().__data__ ? null
   \tselection
   """
 
 selectionEach = (template)->
   ### Iterates over an existing dom selection ###
   """
-  .#{template.key} (data,index)->
+  .each (data,index)->
   \td3.select @
   """
 mountDOM = (template)->
@@ -119,7 +120,7 @@ mountDOM = (template)->
     output = []
     if template.value.startsWith '$'
       unless  '.' in template.value
-        output.push ".#{template.key} #{cbToString template}\"#{template.value.slice 1}\"" 
+        output.push ".#{template.key} #{template.callback}\"#{template.value.slice 1}\"" 
       else
         [tagName, classes...] = template.value.slice 1
           .split '.'
@@ -127,7 +128,7 @@ mountDOM = (template)->
         if len > 0 and '#' in classes[len]
           [classes[len],id] = classes[len].split '#'
         if tagName?
-          output.push ".#{template.key} #{cbToString template}'#{tagName}'" 
+          output.push ".#{template.key} #{template.callback}'#{tagName}'" 
         if classes?
           obj  = {}
           classes.forEach (d)-> obj[d] = if obj? then true else { d: true }
@@ -149,26 +150,33 @@ updateData = (template)->
   if typeof template.value in ['object'] 
       d3.entries template.value
         .forEach (d)->
-          template.value[d.key] = objToString d.value
+          template.value[d.key] = objToString d.value, true
       valueString = JSON.stringify template.value
   else 
     valueString = template.value
+    
   if template.key in ['data']
     if typeof template.value in ['object'] and not Array.isArray template.value 
       ### Convert object to d3.entry ###
-      template.value = d3.entries template.value
+      valueString = JSON.stringify d3.entries template.value
       
-  ".#{template.key} #{cbToString template}#{valueString}"
+  ".#{template.key} #{template.callback}#{valueString}"
   
 updateSelection = (template)-> 
   ### selection ###
-  ".#{template.key} #{cbToString template}#{template.value ? null }"  
+  ".#{template.key} #{template.callback}#{template.value ? null }"  
 updateDOM = (template)->
   ### attr whatever ###
-  classProcess = if template.key in ['classed'] then (d)->"#{d?}" else (d)->"'#{d}'"#
+  classProcess = if template.key in ['classed'] then (d)->"#{d?}" else (d)->"#{d}"#
+  d3.entries template.value 
+    .forEach (value)->
+      template.value[value.key] = objToString value.value, true
+      if template.value[value.key] == value.value
+        template.value[value.key] = "'#{template.value[value.key]}'"
+        
   d3.entries template.value
     .map (d,i)->
-      ".#{template.key} '#{d.key}', #{cbToString template}#{classProcess d.value}"
+      ".#{template.key} '#{d.key}', #{template.callback}#{classProcess d.value}"
     .join '\n'
     
 nullSelection = (template)->
@@ -182,8 +190,8 @@ updateInner = (template) ->
   ### Update inner text  ###
   if Array.isArray template.value
     template.value = template.value.map (d)-> objToString d
-      .join ' '
-  ".#{template.key} #{cbToString template}#{template.value ? '' }"
+      .join '+'
+  ".#{template.key} #{template.callback}#{template.value ? '' }"
   
 cbToString = (template)->
   if template['callback'] and document.__data__.callback[template['callback']]? 
@@ -200,9 +208,6 @@ initTemplate = (opts)->
   * return __data__ to append to template object
   method and default take different arguments
   ###
-  if not document['__data__']
-    ### d3 initialize ``document.__data__``  ###
-    d3.select(document).datum (d)-> d ? {}  
     
     document.__data__ = 
       request: {}
@@ -237,36 +242,30 @@ initTemplate = (opts)->
             if req.length == 0 and onComplete
                 onComplete()
             else
-              [name, type] = req[0].key.split '.' 
-              if document.__data__.request[name]
+              d3[type ? 'text'] req[0].value, (e,d)->
+                document.__data__.request[name] = d
+
                 selection.datum (d)->
                   d ?= {}; d[name] = document.__data__.request[name]
                   d
                 makeRequest req.slice 1
-              else
-                d3[type ? 'text'] req[0].value, (e,d)->
-                  document.__data__.request[name] = d
-                  
-                  selection.datum (d)->
-                    d ?= {}; d[name] = document.__data__.request[name]
-                    d
-                  makeRequest req.slice 1
-          makeRequest d3.entries(obj).filter (d)-> not( d.key in ['call','baseurl'])
+        makeRequest d3.entries(obj).filter (d)-> not( d.key in ['call','baseurl'])
 
+  document['__data__'] ?= {}
+  d3.entries init
+    .forEach (opt)->
+      document['__data__'][opt.key] ?= {}
+      document['__data__'][opt.key] = d3.extend document['__data__'][opt.key], opt.value
 
         
 updateOpts = (opts)->
   if opts
     [__data__, opts ] = 
-      [ opts.__data__ ? null, d3.entries(opts).filter (d)-> not d['key'] in ['__data__']]
-    d3.entries document.__data__
-      .forEach (d)->
-        if opts[d.key]
-          document.__data__[d.key] = d3.merge opts[d.key], d.value
-        else 
-          document.__data__[d.key] = d.value
-          
-  __data__ ? null
+      [ opts.__data__ ? null, d3.entries(opts).filter (d)-> not(d['key'] in ['__data__']) ]
+    if opts?
+      opts.forEach (opt)->
+          document.__data__[opt.key] = d3.extend document.__data__[opt.key], opt.value
+    __data__
   
     
 ### methods convert yaml syntaxes to coffeescript code ###
@@ -278,18 +277,21 @@ methodToCoffee = (template)->
   else if document.__data__.method[template.key]
     ###  write execution of custom method in coffeescrippt ###
     reserved = ['call','each']
-    val = {}
-    d3.entries template.value 
-      .filter (d)-> 
-        if d.key in reserved
-          false
-        else
-          true
-      .forEach (d)-> val[d.key] = d.value
+    if typeof template.value  == 'string'
+      val = template.value
+    else
+      val = {}
+      d3.entries template.value 
+        .filter (d)-> 
+          if d.key in reserved
+            false
+          else
+            true
+        .forEach (d)-> val[d.key] = d.value
     ### Append more templates to selection on next pass ###      
     """
     .call (selection)->
-    \tdocument.__data__.method['#{template.key}'] selection, #{JSON.stringify val}, ()-> selection\\
+    \tdocument.__data__.method['#{template.key}'] selection, #{JSON.stringify val}, ()-> selection
     """    
   else 
     """
@@ -302,54 +304,53 @@ templateToCoffee = (template,output,level,index) ->
   level: hierarchy in object
   index: value of array loop (-1 : not Array)
   ###  
+
   indentBlockString = (indent,lines)->
-    lines.split '\n'
-      .map (line)-> "#{indent}#{line}"
-      .join '\n'
-      
-  level = level + 1
-  template.forEach (template)->
-    [template] = d3.entries template
-    [template['key'],template['callback']] = template['key'].split '.'
-    
-    ### classed is a dumb name ###
-    if template['key'] in ['class'] then template['key'] = 'classed'
-    
-    ### Stringified version of callback in coffee###
-    template['callback'] = cbToString template
-    
-    ### stringify value if necessary ###
-    if template['key'] in d3.keys document.__data__.default
-      ### text and html can concatentate array elements as a special case ###
-      template['value'] = objToString template['value']
-    
-    ### Coffeescript is whitespace aware and is lovely to read ###
-    indent = d3.range(level).map (d)-> ''
-      .join '\t'
-    
-    parsed = methodToCoffee template
-    
-    output.push indentBlockString indent, parsed
-    
-    if template['key'][0..3] in ['call','each']
-      ### Branching data and null selections ###
-      output.push templateToCoffee template.value, [], level, index
+    if template
+      lines.split '\n'
+        .map (line)-> "#{indent}#{line}"
+        .join '\n'
 
-    if template['key'] in d3.keys document.__data__.method
-      ### Methods ###
-      [onCompleteKey] = d3.keys template.value
-        .filter (d)-> d in ['call','each']
-      onComplete = {}
-      onComplete[onCompleteKey] = template.value[onCompleteKey]
-      if template.value['call']? or template.value['each']?
-        output.push templateToCoffee [onComplete], [], level+1, index
-        
+    level = level + 1
+    template.forEach (template)->
+      [template] = d3.entries template
+      [template['key'],template['callback']] = template['key'].split '.'
 
-  output.join '\n'
+      ### classed is a dumb name ###
+      if template['key'] in ['class'] then template['key'] = 'classed'
+
+      ### Stringified version of callback in coffee###
+      template['callback'] = cbToString template
+
+      ### stringify value if necessary ###
+      if template['key'] in d3.keys document.__data__.default
+        ### text and html can concatentate array elements as a special case ###
+        template['value'] = objToString template['value']
+
+      ### Coffeescript is whitespace aware and is lovely to read ###
+      indent = d3.range(level).map (d)-> ''
+        .join '\t'
+
+      parsed = methodToCoffee template
+
+      output.push indentBlockString indent, parsed
+
+      if template['key'][0..3] in ['call','each']
+        ### Branching data and null selections ###
+        output.push templateToCoffee template.value, [], level, index
+
+      if template['key'] in d3.keys document.__data__.method
+        ### Methods ###
+        [onCompleteKey] = d3.keys template.value
+          .filter (d)-> d in ['call','each']
+        onComplete = {}
+        onComplete[onCompleteKey] = template.value[onCompleteKey]
+        if template.value['call']? or template.value['each']?
+          output.push templateToCoffee [onComplete], [], level+1, index
+    output.join '\n'
   
-      
 d3.extend = (obj1, obj2)->
-  d3.entries obj2 
+  d3.entries obj2
     .forEach (d)->
       obj1[d.key] ?= d.value
   obj1
