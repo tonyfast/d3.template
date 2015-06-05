@@ -4,15 +4,19 @@
 client = new ZeroClipboard document.getElementById "copy-button"
 
 client.on  "ready", ( readyEvent ) ->
-  alert "ZeroClipboard SWF is ready!" 
-
+  
+client.on "beforecopy", ( event )->
+    document.__data__.editor.mode.lineNumbers = false
+    
 client.on "aftercopy", ( event )->
   ###
   `this` === `client`
   `event.target` === the element that was clicked
   event.target.style.display = "none";
   ###
-  alert "Copied text to clipboard:  #{event.data['text/plain']}" 
+  document.__data__.editor.mode.lineNumbers = true
+  
+  console.log "Copied text to clipboard:  #{event.data['text/plain']}" 
 
 $(".button-collapse").sideNav \
   menuWidth: 300, 
@@ -23,16 +27,14 @@ contextvalue = d3.select '#context-value'
 
 cm = d3.select '#context'
   .append 'div'
-  .attr 'id', 'codemirror-view'
   .style 'display','none'
   
 document.__data__ = 
   editor: CodeMirror cm.node(), 
           theme: "blackboard"
-          mode: "yaml"
           lineNumbers: true
           lineWrapping: true
-          readOnly: "nocursor"
+          readOnly: false
           extraKeys: 
             "Ctrl-Q": (cm)->cm.foldCode cm.getCursor()
           foldGutter: 
@@ -40,27 +42,46 @@ document.__data__ =
           gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 
 d3.select 'nav'
-  .selectAll 'li'
-  .each ()->
-    if component = @dataset
-      d3.select @
-        .selectAll 'li'
-        .on 'click', ()->
-          d3.select '#header-lang'
-            .text ()=>
-              if [@dataset.key] in ['preview']
-                @dataset.key
-              else 
-                " as #{@dataset.key}"
-          if @dataset.key in ['preview']
-            cm.style 'display','none'
-            contextvalue.style 'display','block'
-          else
-            cm.style 'display','block'
-            contextvalue.style 'display','none'
-            val = if typeof document.__data__.template.body[@dataset.key] in ['object']
-              JSON.stringify document.__data__.template.body[@dataset.key], null,2
-            else 
-              document.__data__.template.body[@dataset.key]
-            document.__data__.editor.setValue val
-            ### Change Code Mirror Mode ###
+  .selectAll '.left li a'
+  .on 'click', ()->
+    d3.select '#header-lang'
+      .text ()=>
+        if [@dataset.key] in ['preview']
+          @dataset.key
+        else 
+          " as #{@dataset.key}"
+          
+        
+    if @dataset.key in ['preview']
+      cm.style 'display','none'
+      contextvalue.style 'display','block'      
+    else
+      document.__data__.editor.mode = @dataset.key
+      cm.style 'display','block'
+      contextvalue.style 'display','none'
+      val = if typeof document.__data__.template.body[@dataset.key] in ['object']
+        JSON.stringify document.__data__.template.body[@dataset.key], null,2
+      else 
+        document.__data__.template.body[@dataset.key]
+      document.__data__.editor.setValue val
+      ### Change Code Mirror Mode ###
+      cm.select '.CodeMirror-lines '
+        .attr 'id', 'codemirror-view'
+        
+document.__data__.editor.on 'update', (cm)->
+  if 'yaml' in [cm.mode]
+    
+    document.__data__.template.body.yaml = cm.getValue() 
+      
+      
+d3.select '#update'
+  .on 'click', ()->
+    yaml = document.__data__.template.body.yaml
+    contextvalue.html ''
+      .template jsyaml.load yaml
+    document.__data__.template.body.yaml = yaml
+
+        
+            
+
+      

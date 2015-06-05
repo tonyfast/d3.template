@@ -1,25 +1,7 @@
 ---
-# Trigger Jekyll Interpreter
+layout: nav-bar
 ---
-<!doctype html>
-<html>
-  <head>
-    {% include head.html %}
-    <!-- the readme.md is literate coffeescript and triggers the page to build -->
-    <script type="text/literate-coffeescript" src="readme.md">
-      </script>
+<div id="context-value"></div>
 
-  </head>
-  <body>  
-    {% include sidenav.html %}
-    {% include modal.html id='edit-modal'%}
-    <div id="context" class="container">
-      <div id="context-value"></div>
-    </div>
-    <!-- All the interactions and playground javascript are here 
-    the javascript file is derived from coffeescript compiled by jekyll
-    -->
-    <script src="{{site.baseurl}}/coffee/app.js">
-      </script>
-  </body>
-</html>
+<script type="text/literate-coffeescript" src="readme.md">
+  </script>

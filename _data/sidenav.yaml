@@ -1,9 +1,6 @@
-template:
-callback:
-request: 
 view:
-  preview: preview
-  coffee: coffeescript
-  js: javascript
   yaml: yaml
   object: json
+  coffee: coffeescript
+  js: javascript
+  preview: preview

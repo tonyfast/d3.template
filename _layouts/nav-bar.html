@@ -1,0 +1,22 @@
+---
+# Trigger Jekyll Interpreter
+---
+<!doctype html>
+<html>
+  <head>
+    {% include head.html %}
+    <!-- the readme.md is literate coffeescript and triggers the page to build -->
+  </head>
+  <body>  
+    {% include navbar2.html %}
+    <div id="context" class="container">
+      {{content}}
+    </div>
+
+    <!-- All the interactions and playground javascript are here 
+    the javascript file is derived from coffeescript compiled by jekyll
+    -->
+    <script src="{{site.baseurl}}/coffee/app.js">
+      </script>
+  </body>
+</html>
