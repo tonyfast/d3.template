@@ -1,0 +1,25 @@
+<nav>
+    <div class="nav-wrapper"> 
+      <a href="#" class="brand-logo center">
+        <code>d3.template</code>&nbsp;<span id="header-lang" class="flow-text">preview</span>
+      </a>
+
+      <ul id="nav-mobile" class="left hide-on-med-and-down">
+        {% for view in site.data.sidenav.view %}
+        <li><a data-key="{{view[0]}}">{{view[1]}}</a></li>
+        {% endfor %}
+      </ul>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <!--
+        <li>
+          <a href="#"  id="copy-button" data-clipboard-target="codemirror-view" title="Click to copy me.">Copy</a>
+        </li>
+        -->
+        <li><a id="update">Update</a></li>
+        <li><a href="https://github.com/tonyfast/d3.template/">Github</a></li>
+        <li><a href="{{site.baseurl}}/about">About</a></li>
+      </ul>
+    </div>
+    
+  </nav>
+        
