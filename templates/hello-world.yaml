@@ -30,8 +30,8 @@ body:
       - data: 
           d3js: http://d3js.org
           coffeescript: http://coffeescript.org
-      - enter: 
-      - append: li    
+      - call-enter: 
+        - append: li    
       - each:
         - append: a
         - attr:
