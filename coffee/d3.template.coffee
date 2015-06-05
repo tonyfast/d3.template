@@ -209,47 +209,47 @@ initTemplate = (opts)->
   method and default take different arguments
   ###
     
-    document.__data__ = 
-      request: {}
-      current: {selection:null,template:null}
-      template: {}
-      callback: 
-        'echo': (d)-> console.log(d); d
-      default:
-        call: selectionCall
-        each: selectionEach
-        insert: mountDOM 
-        append: mountDOM
-        data: updateData
-        datum: updateData
-        select: updateSelection
-        selectAll: updateSelection
-        attr: updateDOM
-        property: updateDOM
-        style: updateDOM
-        classed: updateDOM
-        'call.enter': nullSelection
-        'call.exit': nullSelection
-        'call.transition': nullSelection
-        'call.remove': nullSelection
-        text: updateInner
-        html: updateInner
-      method:
-        test: (selection, obj) -> console.log 'test rule echos: ', obj
-        js: (selection, obj) -> eval obj.value
-        request: (selection, obj, onComplete)->
-          makeRequest = (req)->
-            if req.length == 0 and onComplete
-                onComplete()
-            else
-              d3[type ? 'text'] req[0].value, (e,d)->
-                document.__data__.request[name] = d
+  document.__data__ = 
+    request: {}
+    current: {selection:null,template:null}
+    template: {}
+    callback: 
+      'echo': (d)-> console.log(d); d
+    default:
+      call: selectionCall
+      each: selectionEach
+      insert: mountDOM 
+      append: mountDOM
+      data: updateData
+      datum: updateData
+      select: updateSelection
+      selectAll: updateSelection
+      attr: updateDOM
+      property: updateDOM
+      style: updateDOM
+      classed: updateDOM
+      'call.enter': nullSelection
+      'call.exit': nullSelection
+      'call.transition': nullSelection
+      'call.remove': nullSelection
+      text: updateInner
+      html: updateInner
+    method:
+      test: (selection, obj) -> console.log 'test rule echos: ', obj
+      js: (selection, obj) -> eval obj.value
+      request: (selection, obj, onComplete)->
+        makeRequest = (req)->
+          if req.length == 0 and onComplete
+              onComplete()
+          else
+            d3[type ? 'text'] req[0].value, (e,d)->
+              document.__data__.request[name] = d
 
-                selection.datum (d)->
-                  d ?= {}; d[name] = document.__data__.request[name]
-                  d
-                makeRequest req.slice 1
-        makeRequest d3.entries(obj).filter (d)-> not( d.key in ['call','baseurl'])
+              selection.datum (d)->
+                d ?= {}; d[name] = document.__data__.request[name]
+                d
+              makeRequest req.slice 1
+      makeRequest d3.entries(obj).filter (d)-> not( d.key in ['call','baseurl'])
 
   document['__data__'] ?= {}
   d3.entries init
