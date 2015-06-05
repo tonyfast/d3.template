@@ -300,8 +300,8 @@ methodToCoffee = (template)->
     """
     .call (selection)->
     \tdocument.__data__.method['#{template.key}'] selection, #{JSON.stringify val}, ()=> 
-    \tdata=selection.node().__data__ ? null
-    \tselection
+    \t\tdata=selection.node().__data__ ? null
+    \t\tselection
     """    
   else 
     """
@@ -354,7 +354,7 @@ templateToCoffee = (template,output,level,index) ->
       [onCompleteKey] = d3.keys template.value
         .filter (d)-> d in ['call','each']
       if template.value['call']? or template.value['each']?
-        output.push templateToCoffee template.value[onCompleteKey], [], level, index
+        output.push templateToCoffee template.value[onCompleteKey], [], level+1, index
 
   output.join '\n'
   
