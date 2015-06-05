@@ -183,7 +183,7 @@ nullSelection = (template)->
   ### enter, exit, transition, remove ###
   """
   .call (selection)->
-  \tselection.#{template.key}()
+  \tselection.#{template.key.split('-')[1]}()
   """
   
 updateInner = (template) ->
