@@ -249,7 +249,7 @@ initTemplate = (opts)->
                 d ?= {}; d[name] = document.__data__.request[name]
                 d
               makeRequest req.slice 1
-      makeRequest d3.entries(obj).filter (d)-> not( d.key in ['call','baseurl'])
+        makeRequest d3.entries(obj).filter (d)-> not( d.key in ['call','baseurl'])
 
   document['__data__'] ?= {}
   d3.entries init
