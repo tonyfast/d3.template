@@ -242,13 +242,21 @@ initTemplate = (opts)->
           if req.length == 0 and onComplete
               onComplete()
           else
-            d3[type ? 'text'] req[0].value, (e,d)->
-              document.__data__.request[name] = d
-
+            [name, type] = req[0].key.split '.' 
+            if document.__data__.request[name]
               selection.datum (d)->
-                d ?= {}; d[name] = document.__data__.request[name]
+                d ?= {}
+                d[name] = document.__data__.request[name]
                 d
               makeRequest req.slice 1
+            else
+              d3[type ? 'text'] req[0].value, (e,d)->
+                document.__data__.request[name] = d
+
+                selection.datum (d)->
+                  d ?= {}; d[name] = document.__data__.request[name]
+                  d
+                makeRequest req.slice 1
         makeRequest d3.entries(obj).filter (d)-> not( d.key in ['call','baseurl'])
 
   document['__data__'] ?= {}
