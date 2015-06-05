@@ -173,8 +173,11 @@ updateDOM = (template)->
     
 nullSelection = (template)->
   ### enter, exit, transition, remove ###
-  ".#{template.key}()"  
-
+  """
+  .call (selection)->
+  \tselection.#{template.key}()
+  """
+  
 updateInner = (template) ->
   ### Update inner text  ###
   if Array.isArray template.value
@@ -205,7 +208,8 @@ initTemplate = (opts)->
       request: {}
       current: {selection:null,template:null}
       template: {}
-      callback: {'echo': (d)-> console.log(d); d}
+      callback: 
+        'echo': (d)-> console.log(d); d
       default:
         call: selectionCall
         each: selectionEach
@@ -219,10 +223,10 @@ initTemplate = (opts)->
         property: updateDOM
         style: updateDOM
         classed: updateDOM
-        enter: nullSelection
-        exit: nullSelection
-        transition: nullSelection
-        remove: nullSelection
+        'call.enter': nullSelection
+        'call.exit': nullSelection
+        'call.transition': nullSelection
+        'call.remove': nullSelection
         text: updateInner
         html: updateInner
       method:
@@ -327,10 +331,12 @@ templateToCoffee = (template,output,level,index) ->
     
     output.push indentBlockString indent, parsed
     
-    if template['key'] in ['call','each']
+    if template['key'][0..3] in ['call','each']
+      ### Branching data and null selections ###
       output.push templateToCoffee template.value, [], level, index
 
     if template['key'] in d3.keys document.__data__.method
+      ### Methods ###
       [onCompleteKey] = d3.keys template.value
         .filter (d)-> d in ['call','each']
       onComplete = {}
