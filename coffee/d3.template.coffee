@@ -228,10 +228,10 @@ initTemplate = (opts)->
       property: updateDOM
       style: updateDOM
       classed: updateDOM
-      'call.enter': nullSelection
-      'call.exit': nullSelection
-      'call.transition': nullSelection
-      'call.remove': nullSelection
+      'call-enter': nullSelection
+      'call-exit': nullSelection
+      'call-transition': nullSelection
+      'call-remove': nullSelection
       text: updateInner
       html: updateInner
     method:
