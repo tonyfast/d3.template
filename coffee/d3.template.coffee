@@ -305,49 +305,50 @@ templateToCoffee = (template,output,level,index) ->
   index: value of array loop (-1 : not Array)
   ###  
 
-  indentBlockString = (indent,lines)->
-    if template
+  if template
+    indentBlockString = (indent,lines)->
       lines.split '\n'
         .map (line)-> "#{indent}#{line}"
         .join '\n'
 
-    level = level + 1
-    template.forEach (template)->
-      [template] = d3.entries template
-      [template['key'],template['callback']] = template['key'].split '.'
+  level = level + 1
+  template.forEach (template)->
+    [template] = d3.entries template
+    [template['key'],template['callback']] = template['key'].split '.'
 
-      ### classed is a dumb name ###
-      if template['key'] in ['class'] then template['key'] = 'classed'
+    ### classed is a dumb name ###
+    if template['key'] in ['class'] then template['key'] = 'classed'
 
-      ### Stringified version of callback in coffee###
-      template['callback'] = cbToString template
+    ### Stringified version of callback in coffee###
+    template['callback'] = cbToString template
 
-      ### stringify value if necessary ###
-      if template['key'] in d3.keys document.__data__.default
-        ### text and html can concatentate array elements as a special case ###
-        template['value'] = objToString template['value']
+    ### stringify value if necessary ###
+    if template['key'] in d3.keys document.__data__.default
+      ### text and html can concatentate array elements as a special case ###
+      template['value'] = objToString template['value']
 
-      ### Coffeescript is whitespace aware and is lovely to read ###
-      indent = d3.range(level).map (d)-> ''
-        .join '\t'
+    ### Coffeescript is whitespace aware and is lovely to read ###
+    indent = d3.range(level).map (d)-> ''
+      .join '\t'
 
-      parsed = methodToCoffee template
+    parsed = methodToCoffee template
 
-      output.push indentBlockString indent, parsed
+    output.push indentBlockString indent, parsed
 
-      if template['key'][0..3] in ['call','each']
-        ### Branching data and null selections ###
-        output.push templateToCoffee template.value, [], level, index
+    if template['key'][0..3] in ['call','each']
+      ### Branching data and null selections ###
+      output.push templateToCoffee template.value, [], level, index
 
-      if template['key'] in d3.keys document.__data__.method
-        ### Methods ###
-        [onCompleteKey] = d3.keys template.value
-          .filter (d)-> d in ['call','each']
-        onComplete = {}
-        onComplete[onCompleteKey] = template.value[onCompleteKey]
-        if template.value['call']? or template.value['each']?
-          output.push templateToCoffee [onComplete], [], level+1, index
-    output.join '\n'
+    if template['key'] in d3.keys document.__data__.method
+      ### Methods ###
+      [onCompleteKey] = d3.keys template.value
+        .filter (d)-> d in ['call','each']
+      onComplete = {}
+      onComplete[onCompleteKey] = template.value[onCompleteKey]
+      if template.value['call']? or template.value['each']?
+        output.push templateToCoffee [onComplete], [], level+1, index
+
+  output.join '\n'
   
 d3.extend = (obj1, obj2)->
   d3.entries obj2
