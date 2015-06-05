@@ -76,6 +76,8 @@ objToString = (value, noQuote) ->
       ### Do not wrap is single quotes ###
       if stringvalue.key in ['$']
         "#{value}"
+      else if stringvalue.value in ['@i']
+        "index"
       else if stringvalue.value
         "#{stringvalue.value}#{templateToValueString value.slice 1}"
       else
