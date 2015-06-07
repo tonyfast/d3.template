@@ -236,6 +236,22 @@ initTemplate = (opts)->
       'call-remove': nullSelection
       text: updateInner
       html: updateInner
+      language: (template)->
+        ### 
+        each row in the slice has a quote in the beginning and 
+        I dont understand why.  ObjToValue is a place to look
+        ###
+        block = template.value
+          .split '\n'
+          .map (s)-> "#{'\t'+ s.slice 1}"
+          .join '\n'
+        """
+        .call (selection)->
+        \tselection.html #{template.callback} \"\"\"
+        #{block}
+        \t\"\"\"
+        """
+
     method:
       test: (selection, obj) -> console.log 'test rule echos: ', obj
       js: (selection, obj) -> eval obj.value
@@ -360,8 +376,30 @@ templateToCoffee = (template,output,level,index) ->
 
   output.join '\n'
   
+### Append some d3 utilities ###
+
+# Extend an object the keys in the first are overwritten ###
+  
 d3.extend = (obj1, obj2)->
   d3.entries obj2
     .forEach (d)->
       obj1[d.key] ?= d.value
   obj1
+
+### similar to $.ready() ###
+  
+d3.getScript = (src, callback) ->
+  #{http://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript}
+  script = document.createElement 'script'
+  #{script.async = 1}
+  prior = document.getElementsByTagName('script')[0]
+  prior.parentNode.insertBefore script, prior
+  script.onload = script.onreadystatechange = ( _, isAbort ) ->
+    if isAbort or not script.readyState or /loaded|complete/.test script.readyState
+      script.onload = script.onreadystatechange = null
+      script = undefined
+
+      unless isAbort
+        if callback
+          callback()
+  script.src = src  
