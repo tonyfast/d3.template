@@ -3,4 +3,5 @@ view:
   object: json
   coffee: coffeescript
   js: javascript
+  html: html
   preview: preview

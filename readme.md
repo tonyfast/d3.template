@@ -29,11 +29,13 @@ and the most basic example of d3.template.
           .template yaml, \
             __data__: 
               'private-data': "Available to the template in ``_data``"
+            filter:
+              markdown: (d)-> marked d
         
 4. Append YAML text and final HTML to the template contexts.
         
-        document.__data__.template.body.yaml= d
-        document.__data__.template.body.html= body.select('.hello-world').html()
+        document.__data__.block.body.yaml= d
+        document.__data__.block.body.html= body.select('.hello-world').html()
           .split '><'
           .join '>\n<'          
           
@@ -48,10 +50,10 @@ allows many artifacts to be made.  ``d3.template`` converts and stores structure
 * CoffeeScript
 * HTML
 
-All of the contexts are contained in ``document.__data__.template.body``.  Open you console to have a look.
+All of the contexts are contained in ``document.__data__.block.body``.  Open you console to have a look.
 
         console.log 'All of the template contexts are presented in the object below'
-        console.log document.__data__.template.body
+        console.log document.__data__.block.body
 
 ### Add some interactions
 
