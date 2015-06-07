@@ -2,14 +2,14 @@ d3.selection.prototype.template = (template, opts )->
   ###
   template - a nested array object
     ```yaml
-    - key.callback: value
+    - key.filter: value
     ```yaml
 
     key - d3 and user-defined actions.
-    callback - manipulates data
+    filter - manipulates data
     value - Javascript object that complies with the action.
 
-  opts - append callbacks, rules, and useful data.
+  opts - append filters, rules, and useful data.
   ###
   
   ### initialize document.__data__ and d3.template objects ###
@@ -30,7 +30,7 @@ d3.selection.prototype.template = (template, opts )->
   ### store the template as json, coffee, javascript ###
   
   if key
-    document.__data__.template[key] = {
+    document.__data__.block[key] = {
       object: template
       __data__: __data__
     }
@@ -40,9 +40,9 @@ d3.selection.prototype.template = (template, opts )->
     ["selection=document.__data__.current.selection","data=selection.node().__data__","selection"], 
     1, -1
   
-  document.__data__.template[key].coffee = if key then coffee    
-  document.__data__.template[key].js = CoffeeScript.compile coffee, {bare:true}
-  eval document.__data__.template[key].js
+  document.__data__.block[key].coffee = if key then coffee    
+  document.__data__.block[key].js = CoffeeScript.compile coffee, {bare:true}
+  eval document.__data__.block[key].js
 
 ### Convert to values instead of strings ###
 objToString = (value, noQuote) ->  
@@ -52,7 +52,7 @@ objToString = (value, noQuote) ->
     '@this': "@"
     '@i': "index"
     '@': "data"
-    ':d3.templates': "document.__data__.template"
+    ':d3.templates': "document.__data__.block"
     ':': "window"
     '_': "document.__data__.current.template.__data__"
     '\\': ""
@@ -117,12 +117,12 @@ mountDOM = (template)->
       <tagName class="className1 className2 className3" id="anchor-id"></tagName>
     Make many changes to DOM insert new objects 
 
-    * There is no reason for callback here.  Shit yes there is what is a class value changes.  col-sm-6
+    * There is no reason for filter here.  Shit yes there is what is a class value changes.  col-sm-6
     ###
     output = []
     if template.value.startsWith '$'
       unless  '.' in template.value
-        output.push ".#{template.key} #{template.callback}\"#{template.value.slice 1}\"" 
+        output.push ".#{template.key} #{template.filter}\"#{template.value.slice 1}\"" 
       else
         [tagName, classes...] = template.value.slice 1
           .split '.'
@@ -130,18 +130,18 @@ mountDOM = (template)->
         if len > 0 and '#' in classes[len]
           [classes[len],id] = classes[len].split '#'
         if tagName?
-          output.push ".#{template.key} #{template.callback}'#{tagName}'" 
+          output.push ".#{template.key} #{template.filter}'#{tagName}'" 
         if classes?
           obj  = {}
           classes.forEach (d)-> obj[d] = if obj? then true else { d: true }
           output.push updateDOM 
             key: 'classed'
-            callback: template.callback
+            filter: template.filter
             value: obj
         if id?
           output.push updateDOM 
             key: 'attr'
-            callback: template.callback
+            filter: template.filter
             value: 
               id: id        
       output.join '\n'
@@ -162,11 +162,11 @@ updateData = (template)->
       ### Convert object to d3.entry ###
       valueString = JSON.stringify d3.entries template.value
       
-  ".#{template.key} #{template.callback}#{valueString}"
+  ".#{template.key} #{template.filter}#{valueString}"
   
 updateSelection = (template)-> 
   ### selection ###
-  ".#{template.key} #{template.callback}#{template.value ? null }"  
+  ".#{template.key} #{template.filter}#{template.value ? null }"  
 updateDOM = (template)->
   ### attr whatever ###
   classProcess = if template.key in ['classed'] then (d)->"#{d?}" else (d)->"#{d}"#
@@ -178,7 +178,7 @@ updateDOM = (template)->
         
   d3.entries template.value
     .map (d,i)->
-      ".#{template.key} '#{d.key}', #{template.callback}#{classProcess d.value}"
+      ".#{template.key} '#{d.key}', #{template.filter}#{classProcess d.value}"
     .join '\n'
     
 nullSelection = (template)->
@@ -193,11 +193,11 @@ updateInner = (template) ->
   if Array.isArray template.value
     template.value = template.value.map (d)-> objToString d
       .join '+'
-  ".#{template.key} #{template.callback}#{template.value ? '' }"
+  ".#{template.key} #{template.filter}#{template.value ? '' }"
   
 cbToString = (template)->
-  if template['callback'] and document.__data__.callback[template['callback']]? 
-    "document.__data__.callback['#{template.callback}'] " 
+  if template['filter'] and document.__data__.filter[template['filter']]? 
+    "document.__data__.filter['#{template.filter}'] " 
   else 
     ""
   
@@ -208,16 +208,16 @@ initTemplate = (opts)->
   Init Template initializes the document data and sets the template settings
 
   * return __data__ to append to template object
-  method and default take different arguments
+  mixin and default take different arguments
   ###
     
   init = 
-    request: {}
+    include: {}
     current: {selection:null,template:null}
-    template: {}
-    callback: 
+    block: {}
+    filter: 
       'echo': (d)-> console.log(d); d
-    default:
+    template:
       call: selectionCall
       each: selectionEach
       insert: mountDOM 
@@ -235,24 +235,8 @@ initTemplate = (opts)->
       'call-transition': nullSelection
       'call-remove': nullSelection
       text: updateInner
-      html: updateInner
-      language: (template)->
-        ### 
-        each row in the slice has a quote in the beginning and 
-        I dont understand why.  ObjToValue is a place to look
-        ###
-        block = template.value
-          .split '\n'
-          .map (s)-> "#{'\t'+ s.slice 1}"
-          .join '\n'
-        """
-        .call (selection)->
-        \tselection.html #{template.callback} \"\"\"
-        #{block}
-        \t\"\"\"
-        """
-
-    method:
+      html: updateInner      
+    mixin:
       test: (selection, obj) -> console.log 'test rule echos: ', obj
       js: (selection, obj) -> eval obj.value
       request: (selection, obj, onComplete)->
@@ -261,18 +245,18 @@ initTemplate = (opts)->
               onComplete()
           else
             [name, type] = req[0].key.split '.' 
-            if document.__data__.request[name]
+            if document.__data__.include[name]
               selection.datum (d)->
                 d ?= {}
-                d[name] = document.__data__.request[name]
+                d[name] = document.__data__.include[name]
                 d
               makeRequest req.slice 1
             else
               d3[type ? 'text'] req[0].value, (e,d)->
-                document.__data__.request[name] = d
+                document.__data__.include[name] = d
 
                 selection.datum (d)->
-                  d ?= {}; d[name] = document.__data__.request[name]
+                  d ?= {}; d[name] = document.__data__.include[name]
                   d
                 makeRequest req.slice 1
         makeRequest d3.entries(obj).filter (d)-> not( d.key in ['call','baseurl'])
@@ -294,14 +278,14 @@ updateOpts = (opts)->
     __data__
   
     
-### methods convert yaml syntaxes to coffeescript code ###
-methodToCoffee = (template)->
+### mixins convert yaml syntaxes to coffeescript code ###
+mixinToCoffee = (template)->
   ### Creates string representations of JS objects in coffee ###
-  if document.__data__.default[template.key]
+  if document.__data__.template[template.key]
     ### default d3 actions ###
-    document.__data__.default[template.key] template
-  else if document.__data__.method[template.key]
-    ###  write execution of custom method in coffeescrippt ###
+    document.__data__.template[template.key] template
+  else if document.__data__.mixin[template.key]
+    ###  write execution of custom mixin in coffeescrippt ###
     reserved = ['call','each']
     if typeof template.value  == 'string'
       val = template.value
@@ -317,7 +301,7 @@ methodToCoffee = (template)->
     ### Append more templates to selection on next pass ###      
     """
     .call (selection)->
-    \tdocument.__data__.method['#{template.key}'] selection, #{JSON.stringify val}, ()=> 
+    \tdocument.__data__.mixin['#{template.key}'] selection, #{JSON.stringify val}, ()=> 
     \t\tdata=selection.node().__data__ ? null
     \t\tselection
     """    
@@ -342,16 +326,16 @@ templateToCoffee = (template,output,level,index) ->
   level = level + 1
   template.forEach (template)->
     [template] = d3.entries template
-    [template['key'],template['callback']] = template['key'].split '.'
+    [template['key'],template['filter']] = template['key'].split '.'
 
     ### classed is a dumb name ###
     if template['key'] in ['class'] then template['key'] = 'classed'
 
-    ### Stringified version of callback in coffee###
-    template['callback'] = cbToString template
+    ### Stringified version of filter in coffee###
+    template['filter'] = cbToString template
 
     ### stringify value if necessary ###
-    if template['key'] in d3.keys document.__data__.default
+    if template['key'] in d3.keys document.__data__.template
       ### text and html can concatentate array elements as a special case ###
       template['value'] = objToString template['value']
 
@@ -359,7 +343,7 @@ templateToCoffee = (template,output,level,index) ->
     indent = d3.range(level).map (d)-> ''
       .join '\t'
 
-    parsed = methodToCoffee template
+    parsed = mixinToCoffee template
 
     output.push indentBlockString indent, parsed
 
@@ -367,8 +351,8 @@ templateToCoffee = (template,output,level,index) ->
       ### Branching data and null selections ###
       output.push templateToCoffee template.value, [], level, index
 
-    if template['key'] in d3.keys document.__data__.method
-      ### Methods ###
+    if template['key'] in d3.keys document.__data__.mixin
+      ### mixins ###
       [onCompleteKey] = d3.keys template.value
         .filter (d)-> d in ['call','each']
       if template.value['call']? or template.value['each']?
