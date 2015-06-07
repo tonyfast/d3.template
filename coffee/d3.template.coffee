@@ -193,7 +193,18 @@ updateInner = (template) ->
   if Array.isArray template.value
     template.value = template.value.map (d)-> objToString d
       .join '+'
-  ".#{template.key} #{template.filter}#{template.value ? '' }"
+  
+  value = if template.filter?
+    """
+    \"\"\"
+    #{ template.value.split('\n').map (s)-> "#{'\t'+ s.slice 1}"
+      .join('\n')}
+    \"\"\"
+    """
+  else 
+    template.value ? ''
+    
+  ".#{template.key} #{template.filter}#{ value }"
   
 cbToString = (template)->
   if template['filter'] and document.__data__.filter[template['filter']]? 
