@@ -28,6 +28,10 @@ hopes to accelerate the design and innovation of web-based presentation layers f
     
 4. That HTML is the current selection is changed.
 
+```html
+<h1>This is a heading</h1>
+```
+
 
 ## ``document.__data__``
 
