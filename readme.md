@@ -2,7 +2,9 @@
 
 ``d3.template`` creates javascript and html from structured data objects.  This project 
 hopes to accelerate the design and innovation of web-based presentation layers for data.
-  
+
+> This readme is written in Literate Coffeescript and can run as code.
+
 ## Basic usage?
 
 0. ``d3.template`` requires [d3js](www.d3js.org); it is extends the [``d3.selection.prototype``]().  
