@@ -14,7 +14,10 @@ d3.selection.prototype.template = (template, opts )->
   
   ### initialize document.__data__ and d3.template objects ###
   initTemplate()
+  
+  ### Append any custom operations ###
   __data__ = updateOpts opts
+  
   ### split key and value from template if they exist. ###
   [key,template] = unless Array.isArray template
     [d3.keys( template )[0],d3.values( template )[0]]
@@ -26,9 +29,7 @@ d3.selection.prototype.template = (template, opts )->
   document.__data__.current = 
     selection: @
     template: template
-  
-  ### store the template as json, coffee, javascript ###
-  
+    
   if key
     document.__data__.block[key] = {
       object: template
@@ -36,26 +37,17 @@ d3.selection.prototype.template = (template, opts )->
     }
     
   ### convert actions to coffeescript ###
-  coffee = templateToCoffee template,
-    ["selection=document.__data__.current.selection","data=selection.node().__data__","selection"], 
-    1, -1
+  coffee = templateToCoffee \
+    template, ["selection=document.__data__.current.selection","data=selection.node().__data__","selection"], 1, -1
   
   document.__data__.block[key].coffee = if key then coffee    
   document.__data__.block[key].js = CoffeeScript.compile coffee, {bare:true}
   eval document.__data__.block[key].js
+  document.__data__.block[key].html = document.__data__.current.selection.html()
 
 ### Convert to values instead of strings ###
 objToString = (value, noQuote) ->  
   ### Transform rule object to coffeescript string prefix ###
-  prefix = 
-    '$': ""
-    '@this': "@"
-    '@i': "index"
-    '@': "data"
-    ':d3.templates': "document.__data__.block"
-    ':': "window"
-    '_': "document.__data__.current.template.__data__"
-    '\\': ""
 
   templateToValueString = (value) ->
     ### 
@@ -69,7 +61,7 @@ objToString = (value, noQuote) ->
     else
       ""
   if value and typeof value in ['string']
-    [stringvalue] = d3.entries prefix
+    [stringvalue] = d3.entries document.__data__.prefix
       .filter (prefix) ->
         value.startsWith prefix.key
     if stringvalue
@@ -191,20 +183,26 @@ nullSelection = (template)->
 updateInner = (template) ->
   ### Update inner text  ###
   if Array.isArray template.value
-    template.value = template.value.map (d)-> objToString d
-      .join '+'
-  
-  value = if template.filter?
+    value = template.value.map (d)-> 
+      _d = objToString d, true
+      hasPre = d3.keys document.__data__.prefix
+        .filter (prefix)->
+          d.startsWith prefix
+        .length
+      if hasPre > 0
+        _d = "\#\{#{_d}\}"
+      _d
+    .join ''
+  else 
+    value = template.value ? ''
+  if template.key in ['html'] 
     """
-    \"\"\"
-    #{ template.value.split('\n').map (s)-> "#{'\t'+ s.slice 1}"
-      .join('\n')}
+    .#{template.key} #{template.filter} \"\"\"
+    #{ value }
     \"\"\"
     """
   else 
-    template.value ? ''
-    
-  ".#{template.key} #{template.filter}#{ value }"
+    ".#{template.key} #{template.filter}#{value}"
   
 cbToString = (template)->
   if template['filter'] and document.__data__.filter[template['filter']]? 
@@ -227,7 +225,9 @@ initTemplate = (opts)->
     current: {selection:null,template:null}
     block: {}
     filter: 
-      'echo': (d)-> console.log(d); d
+      echo: (d)-> console.log(d); d
+      markdown: (d)-> marked d
+      jade: (d)-> jade.render d
     template:
       call: selectionCall
       each: selectionEach
@@ -271,6 +271,15 @@ initTemplate = (opts)->
                   d
                 makeRequest req.slice 1
         makeRequest d3.entries(obj).filter (d)-> not( d.key in ['call','baseurl'])
+    prefix:
+      '$': ""
+      '@this': "@"
+      '@i': "index"
+      '@': "data"
+      ':d3.templates': "document.__data__.block"
+      ':': "window"
+      '_': "document.__data__.current.template.__data__"
+      '\\': ""
 
   document['__data__'] ?= {}
   d3.entries init
@@ -346,7 +355,7 @@ templateToCoffee = (template,output,level,index) ->
     template['filter'] = cbToString template
 
     ### stringify value if necessary ###
-    if template['key'] in d3.keys document.__data__.template
+    if template['key'] in d3.keys(document.__data__.template).filter((d)->d!='html')
       ### text and html can concatentate array elements as a special case ###
       template['value'] = objToString template['value']
 
