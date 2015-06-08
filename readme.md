@@ -49,6 +49,7 @@ would create the ``__data__`` class if it did not exist.
     
 * Filters modify the value before the template is applied.  Templates are triggered
   with ``template.filter`` in the key. 
+* An ``include`` is made with the request ``mixin``.
   
 ## Scoping d3 variables
 
@@ -98,6 +99,11 @@ presented as HTML.
 |``attr``|``attr``| change the state of a DOM node |
 |``append``|``append``| add a new node to the DOM |
 
+## Making Requests
+
+Copy and paste an example [gist](https://gist.github.com/tonyfast/7214a6682b68ea3e8727).
+
+Successful requests are loaded to ``document.__data__.include``.
 
 ## Using Markdown
 
