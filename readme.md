@@ -65,7 +65,7 @@ would create the ``__data__`` class if it did not exist.
 
 ``$tagName.class1.class2#tag-id`` creates ``<tagName class="class1 class2" id="tag-id"></tagName>``
     
-### What happened? ###
+### What happens? ###
 
 When ``.template`` is applied to the selection.  The structured object is converted into
 Coffeescript then Javascript and finally it is display on the page as HTML.
@@ -101,7 +101,7 @@ presented as HTML.
 
 ## Using Markdown
 
-
+Add the ``markdown`` filter to the ``html`` template.
         
         mdobj = [
           - append: div
