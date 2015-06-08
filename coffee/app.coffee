@@ -59,10 +59,10 @@ d3.select 'nav'
       document.__data__.editor.mode = @dataset.key
       cm.style 'display','block'
       contextvalue.style 'display','none'
-      val = if typeof document.__data__.template.body[@dataset.key] in ['object']
-        JSON.stringify document.__data__.template.body[@dataset.key], null,2
+      val = if typeof document.__data__.block.body[@dataset.key] in ['object']
+        JSON.stringify document.__data__.block.body[@dataset.key], null,2
       else 
-        document.__data__.template.body[@dataset.key]
+        document.__data__.block.body[@dataset.key]
       document.__data__.editor.setValue val
       ### Change Code Mirror Mode ###
       cm.select '.CodeMirror-lines '
@@ -71,15 +71,15 @@ d3.select 'nav'
 document.__data__.editor.on 'update', (cm)->
   if 'yaml' in [cm.mode]
     
-    document.__data__.template.body.yaml = cm.getValue() 
+    document.__data__.block.body.yaml = cm.getValue() 
       
       
 d3.select '#update'
   .on 'click', ()->
-    yaml = document.__data__.template.body.yaml
+    yaml = document.__data__.block.body.yaml
     contextvalue.html ''
       .template jsyaml.load yaml
-    document.__data__.template.body.yaml = yaml
+    document.__data__.block.body.yaml = yaml
 
         
             
